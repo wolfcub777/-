@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資料輸入表單</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="text"], input[type="password"], select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0 20px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .csv-import-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .csv-import {
+            background-color: #f1f1f1;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .csv-import input[type="file"] {
+            padding: 5px;
+        }
+        .csv-import button {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>使用者資料輸入表單</h1>
+        <form id="userForm">
+            <label for="account">帳號:</label>
+            <input type="text" id="account" name="account" required>
+
+            <label for="name">名字:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="identity">身份:</label>
+            <select id="identity" name="identity" required>
+                <option value="學生">學生</option>
+                <option value="教職員">教職員</option>
+            </select>
+
+            <label for="contactInfo">聯絡資訊:</label>
+            <input type="text" id="contactInfo" name="contactInfo" required>
+
+            <label for="password">密碼:</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="vehicleType">車輛類型:</label>
+            <select id="vehicleType" name="vehicleType" required>
+                <option value="汽車">汽車</option>
+                <option value="機車">機車</option>
+            </select>
+
+            <label for="plateNumber">車牌號碼:</label>
+            <input type="text" id="plateNumber" name="plateNumber" required>
+
+            <div class="button-group">
+                <button type="button" onclick="submitData()">提交資料</button>
+                <button type="button" onclick="viewSubmittedData()">查看已提交資料</button>
+                <button type="button" onclick="saveToDatabase()">結束並匯入資料庫</button>
+                <button type="button" onclick="queryHistory()">查詢歷史資料</button>
+                <button type="button" onclick="reviewApplications()">審核申請</button> <!-- 新增的審核按鈕 -->
+            </div>
+        </form>
+
+        <div class="csv-import-area">
+            <div class="csv-import">
+                <h2>匯入 CSV 資料</h2>
+                <form action="importCsv.php" method="POST" enctype="multipart/form-data" onsubmit="return validateCsvInput()">
+                    <input type="file" name="csv_file" id="csv_file" accept=".csv">
+                    <button type="submit">匯入 CSV</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="submittedCount"></div>
+    </div>
+
+    <script>
+        let dataStore = JSON.parse(localStorage.getItem("submittedData")) || [];
+
+        function submitData() {
+            const account = document.getElementById('account').value.trim();
+            const name = document.getElementById('name').value.trim();
+            const identity = document.getElementById('identity').value.trim();
+            const contactInfo = document.getElementById('contactInfo').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const vehicleType = document.getElementById('vehicleType').value;
+            const plateNumber = document.getElementById('plateNumber').value.trim();
+
+            if (!account || !name || !identity || !contactInfo || !password || !vehicleType || !plateNumber) {
+                alert("請輸入所有欄位的資料");
+                return;
+            }
+
+            const userData = {
+                account: account,
+                name: name,
+                identity: identity,
+                contactInfo: contactInfo,
+                password: password,
+                vehicleType: vehicleType,
+                plateNumber: plateNumber
+            };
+
+            dataStore.push(userData);
+            localStorage.setItem("submittedData", JSON.stringify(dataStore));
+            displaySubmittedCount();
+            clearForm();
+        }
+
+        function clearForm() {
+            document.getElementById('userForm').reset();
+        }
+
+        function viewSubmittedData() {
+            window.location.href = 'submitted_data.html';
+        }
+
+        function saveToDatabase() {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "saveData.php", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    alert('資料已成功匯入資料庫');
+                    dataStore = [];
+                    localStorage.removeItem("submittedData");
+                    displaySubmittedCount();
+                }
+            };
+
+            xhr.send(JSON.stringify(dataStore));
+        }
+
+        function queryHistory() {
+            window.location.href = 'history.php';
+        }
+
+        function reviewApplications() {
+            window.location.href = 'review_interface.html'; // 跳轉至審核頁面
+        }
+
+        function displaySubmittedCount() {
+            document.getElementById('submittedCount').innerHTML = "<h3>已提交 " + dataStore.length + " 筆資料</h3>";
+        }
+
+        function validateCsvInput() {
+            const fileInput = document.getElementById('csv_file');
+            if (!fileInput.value) {
+                alert('請選擇一個有效的 CSV 檔案進行上傳。');
+                return false;
+            }
+            return true;
+        }
+
+        displaySubmittedCount();
+    </script>
+</body>
+</html>
