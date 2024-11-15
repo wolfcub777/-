@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>報表選擇</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .button, .back-button {
+            margin: 10px;
+            padding: 15px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .button:hover, .back-button:hover {
+            background-color: #45a049;
+        }
+        .back-button {
+            background-color: #808080;
+        }
+        .back-button:hover {
+            background-color: #6e6e6e;
+        }
+        .back-button:link, .back-button:visited {
+            color: white;
+            text-decoration: none;
+        }
+        .date-container, .week-container, .month-container {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+    <!-- 引入 SheetJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        function showDateSelection() {
+            document.getElementById('date-container').style.display = 'block';
+            document.getElementById('week-container').style.display = 'none';
+            document.getElementById('month-container').style.display = 'none';
+        }
+
+        function showWeekSelection() {
+            document.getElementById('week-container').style.display = 'block';
+            document.getElementById('date-container').style.display = 'none';
+            document.getElementById('month-container').style.display = 'none';
+        }
+
+        function showMonthSelection() {
+            document.getElementById('month-container').style.display = 'block';
+            document.getElementById('date-container').style.display = 'none';
+            document.getElementById('week-container').style.display = 'none';
+        }
+
+        function downloadReport() {
+            const date = document.getElementById('report-date').value;
+            if (date) {
+                const data = [
+                    ["序號", "填寫時間", "填寫日期", "班級", "學號/職員編號", "姓名", "停車時間", "學生/教職員", "聯絡電話", "汽車車號", "機車車號", "已確認"],
+                    ["1", "08:00", date, "A班", "123456", "王小明", "08:00-18:00", "學生", "0987654321", "ABC-1234", "", "是"]
+                ];
+                const worksheet = XLSX.utils.aoa_to_sheet(data);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "日報表");
+                XLSX.writeFile(workbook, `日報表_${date}.xlsx`);
+            } else {
+                alert('請選擇日期');
+            }
+        }
+
+        function downloadWeeklyReport() {
+            const week = document.getElementById('report-week').value;
+            if (week) {
+                const year = week.split('-W')[0];
+                const weekNumber = week.split('-W')[1];
+                const filename = `週報表_${year}_W${weekNumber}.xlsx`;
+                const data = [
+                    ["序號", "填寫時間", "填寫日期", "班級", "學號/職員編號", "姓名", "停車時間", "學生/教職員", "聯絡電話", "汽車車號", "機車車號", "已確認"],
+                    ["1", "08:00", "2024-11-13", "A班", "123456", "王小明", "08:00-18:00", "學生", "0987654321", "ABC-1234", "", "是"]
+                ];
+                const worksheet = XLSX.utils.aoa_to_sheet(data);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "週報表");
+                XLSX.writeFile(workbook, filename);
+            } else {
+                alert('請選擇週數');
+            }
+        }
+
+        function downloadMonthlyReport() {
+            const month = document.getElementById('report-month').value;
+            if (month) {
+                const year = month.split('-')[0];
+                const monthNumber = month.split('-')[1];
+                const filename = `月報表_${year}_${monthNumber}.xlsx`;
+                const data = [
+                    ["序號", "填寫時間", "填寫日期", "班級", "學號/職員編號", "姓名", "停車時間", "學生/教職員", "聯絡電話", "汽車車號", "機車車號", "已確認"],
+                    ["1", "08:00", `${year}-${monthNumber}-01`, "A班", "123456", "王小明", "08:00-18:00", "學生", "0987654321", "ABC-1234", "", "是"]
+                ];
+                const worksheet = XLSX.utils.aoa_to_sheet(data);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "月報表");
+                XLSX.writeFile(workbook, filename);
+            } else {
+                alert('請選擇月份');
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>選擇報表類型</h1>
+    <div class="container">
+        <button class="button" onclick="showDateSelection()">日報表</button>
+        <button class="button" onclick="showWeekSelection()">週報表</button>
+        <button class="button" onclick="showMonthSelection()">月報表</button>
+
+        <div id="date-container" class="date-container">
+            <h2>選擇日報表日期</h2>
+            <input type="date" id="report-date" class="date-picker">
+            <button class="button" onclick="downloadReport()">下載日報表</button>
+        </div>
+
+        <div id="week-container" class="week-container">
+            <h2>選擇週報表週數</h2>
+            <label for="report-week">選擇週數:</label>
+            <input type="week" id="report-week" class="week-picker">
+            <button class="button" onclick="downloadWeeklyReport()">下載週報表</button>
+        </div>
+
+        <div id="month-container" class="month-container">
+            <h2>選擇月報表月份</h2>
+            <label for="report-month">選擇月份:</label>
+            <input type="month" id="report-month" class="month-picker">
+            <button class="button" onclick="downloadMonthlyReport()">下載月報表</button>
+        </div>
+
+        <a href="合體巨獸.html" class="back-button">返回</a>
+    </div>
+</body>
+</html>

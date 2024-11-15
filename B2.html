@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>停車場管理系統</title>
+    <style>
+        /* 停車場容器的基本樣式 */
+        .parking-lot {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* 停車位的樣式 */
+        .parking-space {
+            cursor: pointer;
+        }
+
+        /* 滑鼠懸停時的效果 */
+        .parking-space:hover {
+            fill: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>機車停車場佈局</h1>
+    <div class="parking-lot-container">
+        <svg class="parking-lot" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+            <image href="B252.svg" x="0" y="0" width="100%" height="100%" />
+            <g class="parking-space" id="index" transform="translate(450, 750)">
+                <rect width="100" height="40" rx="5" ry="5" fill="green" />
+                <text class="parking-text" x="35" y="25">輸入</text>
+            </g>
+        </svg>
+    </div>
+
+    <button onclick="window.location.href='B3.html'" style="position: fixed; bottom: 10px; right: 10px; padding: 10px 20px;">
+        切換到 B3 停車場
+    </button>
+	
+
+    <script>
+        document.querySelectorAll('.parking-space').forEach(function (space) {
+            space.addEventListener('click', function () {
+                window.location.href = 'index.html'; // 跳轉到 index.html
+            });
+        });
+    </script>
+</body>
+</html>

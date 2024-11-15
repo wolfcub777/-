@@ -75,6 +75,19 @@
         .csv-import button {
             margin-left: 10px;
         }
+        .back-grey-btn {
+            background-color: #B0B0B0;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .back-grey-btn:hover {
+            background-color: #A0A0A0;
+        }
     </style>
 </head>
 <body>
@@ -113,7 +126,8 @@
                 <button type="button" onclick="viewSubmittedData()">查看已提交資料</button>
                 <button type="button" onclick="saveToDatabase()">結束並匯入資料庫</button>
                 <button type="button" onclick="queryHistory()">查詢歷史資料</button>
-                <button type="button" onclick="reviewApplications()">審核申請</button> <!-- 新增的審核按鈕 -->
+                <button type="button" onclick="window.location.href='review_interface.php'">審核申請</button>
+                <button type="button" class="back-grey-btn" onclick="window.location.href='合體巨獸.html'">回合體巨獸</button> <!-- 新增的灰色按鈕 -->
             </div>
         </form>
 
@@ -192,14 +206,6 @@
             window.location.href = 'history.php';
         }
 
-        function reviewApplications() {
-            window.location.href = 'review_interface.html'; // 跳轉至審核頁面
-        }
-
-        function displaySubmittedCount() {
-            document.getElementById('submittedCount').innerHTML = "<h3>已提交 " + dataStore.length + " 筆資料</h3>";
-        }
-
         function validateCsvInput() {
             const fileInput = document.getElementById('csv_file');
             if (!fileInput.value) {
@@ -207,6 +213,10 @@
                 return false;
             }
             return true;
+        }
+
+        function displaySubmittedCount() {
+            document.getElementById('submittedCount').innerHTML = "<h3>已提交 " + dataStore.length + " 筆資料</h3>";
         }
 
         displaySubmittedCount();

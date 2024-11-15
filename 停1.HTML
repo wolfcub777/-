@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>停車位概覽</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: center;
+            margin-top: 50px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .large-rectangle {
+            width: 100px;
+            height: 400px;
+            background-color: white;
+            border: 3px solid black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            text-decoration: none;
+            color: black;
+        }
+
+        .medium-rectangle {
+            width: 100px;
+            height: 200px;
+            background-color: white;
+            border: 3px solid black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            text-decoration: none;
+            color: black;
+        }
+
+        .small-rectangle {
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            border: 3px solid black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            text-decoration: none;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+
+    <h2 style="text-align: center;">機車停車位概覽</h2>
+
+    <div class="container">
+        <!-- 右邊的停車位按鈕 -->
+        <div class="column">
+            <a href="parking-details-5-9.html" class="small-rectangle">停車位 5-9</a>
+            <a href="parking-details-261-268.html" class="medium-rectangle">停車位 261-268</a>
+            <a href="parking-details-269-278.html" class="medium-rectangle">停車位 269-278</a>
+            <a href="parking-details-279-285.html" class="medium-rectangle">停車位 279-285</a>
+            <a href="parking-details-232-259.html" class="large-rectangle">停車位 232-259</a>
+        </div>
+    </div>
+
+</body>
+</html>

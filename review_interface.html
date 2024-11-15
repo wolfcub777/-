@@ -1,0 +1,138 @@
+<?php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "停車場巡查使用系統";
+
+// 建立資料庫連接
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// 檢查連接
+if ($conn->connect_error) {
+    die("連接失敗: " . $conn->connect_error . " (錯誤代碼: " . $conn->connect_errno . ")");
+}
+
+// 從資料庫中獲取待審核資料
+$sql = "SELECT * FROM 使用者 WHERE 審核狀態 IS NULL"; // 假設有一個欄位標記審核狀態
+$result = $conn->query($sql);
+
+if (!$result) {
+    die("查詢失敗: " . $conn->error . " (錯誤代碼: " . $conn->errno . ")");
+}
+?>
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>審核申請介面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        .approve {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .reject {
+            background-color: #f44336;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .back-btn {
+            margin: 20px 0;
+            padding: 10px 20px;
+            background-color: #2196F3;
+            color: white;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+        .back-btn:hover {
+            background-color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="goBack()">返回</button>
+
+    <h1>審核申請</h1>
+    <form method="POST" action="processReview.php">
+        <table>
+            <thead>
+                <tr>
+                    <th>帳號</th>
+                    <th>名字</th>
+                    <th>身份</th>
+                    <th>聯絡資訊</th>
+                    <th>密碼</th>
+                    <th>車輛類型</th>
+                    <th>車牌號碼</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if ($result->num_rows > 0): ?>
+                    <?php while($row = $result->fetch_assoc()): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($row['帳號']); ?></td>
+                            <td><?php echo htmlspecialchars($row['名字']); ?></td>
+                            <td><?php echo htmlspecialchars($row['身份']); ?></td>
+                            <td><?php echo htmlspecialchars($row['聯絡資訊']); ?></td>
+                            <td><?php echo htmlspecialchars($row['密碼']); ?></td>
+                            <td><?php echo htmlspecialchars($row['車輛類型']); ?></td>
+                            <td><?php echo htmlspecialchars($row['車牌號碼']); ?></td>
+                            <td>
+                                <button type="submit" name="action" value="approve_<?php echo $row['帳號']; ?>">批准</button>
+                                <button type="submit" name="action" value="reject_<?php echo $row['帳號']; ?>">拒絕</button>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="8">無申請資料</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </form>
+
+    <script>
+        function goBack() {
+            window.history.back(); // 返回上一頁
+        }
+    </script>
+</body>
+</html>
+
+<?php
+$conn->close();
+?>

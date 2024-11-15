@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>報表管理系統</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f7f7f7;
+        }
+        h1 {
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #reportContent {
+            margin-top: 20px;
+        }
+        .back-button {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>停車場報表系統</h1>
+    
+    <div style="text-align: center;">
+        <button onclick="loadVehicleTypeReport()">車輛類型統計報表</button>
+        <button onclick="loadDailyParkingReport()">每日停車次數統計報表</button>
+        <button onclick="loadParkingDurationReport()">車輛停留時長報表</button>
+    </div>
+
+    <div id="reportContent"></div>
+
+    <script>
+        function loadVehicleTypeReport() {
+            fetch('vehicleTypeReport.php')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('reportContent').innerHTML = data + '<button class="back-button" onclick="returnToHome()">返回首頁</button>';
+                });
+        }
+
+        function loadDailyParkingReport() {
+            fetch('dailyParkingReport.php')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('reportContent').innerHTML = data + '<button class="back-button" onclick="returnToHome()">返回首頁</button>';
+                });
+        }
+
+        function loadParkingDurationReport() {
+            fetch('parkingDurationReport.php')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('reportContent').innerHTML = data + '<button class="back-button" onclick="returnToHome()">返回首頁</button>';
+                });
+        }
+
+        function returnToHome() {
+            document.getElementById('reportContent').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

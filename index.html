@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>停車場數位佈局</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-layout {
+            display: flex;
+        }
+
+        .left-column {
+            width: 150px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .left-column button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .content {
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .buttons {
+            margin-top: 20px;
+        }
+
+        .buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .nav-buttons {
+            margin-top: 20px;
+        }
+
+        .nav-buttons a {
+            display: inline-block;
+            background-color: green;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            text-decoration: none;
+            margin: 5px;
+            border-radius: 5px;
+        }
+
+        .parking-lot {
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            max-height: 600px; /* 設置容器的最大高度 */
+            overflow-y: auto;  /* 當超出高度時顯示滾動條 */
+        }
+
+        .parking-space {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid black;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .available {
+            background-color: green;
+            color: white;
+        }
+
+        .not-available {
+            background-color: gray;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-layout">
+        <div class="left-column">
+            <button onclick="showParkingSpaces('first', 1)">第一次</button>
+            <button onclick="showParkingSpaces('second', 1)">第二次</button>
+            <button onclick="showParkingSpaces('third', 1)">第三次</button>
+            <button onclick="printTable()">表格列印</button>
+        </div>
+
+        <div class="content">
+            <h1 id="title">停車場數位佈局</h1>
+
+            <div class="nav-buttons">
+                <a href="B2.html">機車平面圖</a>
+            </div>
+
+            <div class="buttons" id="range-buttons">
+                <button onclick="showParkingSpaces(currentPeriod, 1)">1-50</button>
+                <button onclick="showParkingSpaces(currentPeriod, 51)">51-100</button>
+                <button onclick="showParkingSpaces(currentPeriod, 101)">101-150</button>
+                <button onclick="showParkingSpaces(currentPeriod, 151)">151-200</button>
+                <button onclick="showParkingSpaces(currentPeriod, 201)">201-250</button>
+                <button onclick="showParkingSpaces(currentPeriod, 251)">251-300</button>
+                <button onclick="showParkingSpaces(currentPeriod, 301)">301-350</button>
+                <button onclick="showParkingSpaces(currentPeriod, 351)">351-400</button>
+                <button onclick="showParkingSpaces(currentPeriod, 401)">401-450</button>
+                <button onclick="showParkingSpaces(currentPeriod, 451)">451-454</button>
+            </div>
+
+            <div class="parking-lot" id="parking-lot"></div>
+        </div>
+    </div>
+<button onclick="window.location.href='index3.html'" style="position: fixed; bottom: 10px; right: 10px; padding: 10px 20px;">
+        汽車輸入在這裡
+    </button>
+	
+    <script>
+        let parkingData = JSON.parse(localStorage.getItem('parkingData')) || {
+            first: Array(454).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false })),
+            second: Array(454).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false })),
+            third: Array(454).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false }))
+        };
+
+        let currentPeriod = 'first';
+        const parkingLot = document.getElementById('parking-lot');
+        const titleElement = document.getElementById('title');
+
+        const titles = {
+            first: "停車場數位佈局 - 第一次",
+            second: "停車場數位佈局 - 第二次",
+            third: "停車場數位佈局 - 第三次"
+        };
+
+        function showParkingSpaces(period, startIndex) {
+            currentPeriod = period;
+            titleElement.textContent = titles[period];
+            parkingLot.innerHTML = '';
+
+            const endIndex = Math.min(startIndex + 49, 454);
+            const currentParkingData = parkingData[period].slice(startIndex - 1, endIndex);
+
+            currentParkingData.forEach(space => {
+                const parkingSpace = document.createElement('div');
+                
+                if (space.status === 'available') {
+                    parkingSpace.classList.add('parking-space', 'available');
+                    parkingSpace.addEventListener('click', function() {
+                        window.location.href = `parking_detail.html?id=${space.id}&period=${period}&autoConfirm=true`;
+                    });
+                } else if (space.status === 'not-available') {
+                    parkingSpace.classList.add('parking-space', 'not-available');
+                    parkingSpace.addEventListener('click', function() {
+                        window.location.href = `parking_detail.html?id=${space.id}&period=${period}`;
+                    });
+                }
+
+                parkingSpace.id = space.id;
+                parkingSpace.innerText = space.id;
+
+                parkingLot.appendChild(parkingSpace);
+            });
+
+            // 手動新增第101到110個按鈕
+            for (let i = 101; i <= 454; i++) {
+                if (startIndex <= i && i <= endIndex) {
+                    const extraButton = document.createElement('div');
+                    extraButton.classList.add('parking-space', 'available');
+                    extraButton.innerText = i;
+                    extraButton.addEventListener('click', function() {
+                        window.location.href = `parking_detail.html?id=${i}&period=${period}&autoConfirm=true`;
+                    });
+                    parkingLot.appendChild(extraButton);
+                }
+            }
+        }
+
+        function printTable() {
+            window.location.href = 'print_table.html';
+        }
+
+        showParkingSpaces('first', 1);
+
+        window.addEventListener('beforeunload', function() {
+            localStorage.setItem('parkingData', JSON.stringify(parkingData));
+        });
+    </script>
+</body>
+</html>

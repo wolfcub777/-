@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>停車場管理系統</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0; /* 移除頁面邊距 */
+            background-image: url('P.png'); /* 使用最新上傳的圖片 */
+            background-size: contain; /* 確保圖片保持比例且完整顯示 */
+            background-repeat: no-repeat; /* 防止圖片重複 */
+            background-position: center center; /* 圖片置中 */
+            background-attachment: fixed; /* 當頁面滾動時保持背景固定 */
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.8); /* 半透明背景，讓按鈕更清晰 */
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 50px; /* 提供一些上方空間 */
+        }
+        .button {
+            margin: 10px;
+            padding: 15px 30px;
+            background-color: rgba(76, 175, 80, 0.9); /* 半透明背景，突出按鈕 */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: rgba(69, 160, 73, 0.9);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>停車場管理系統</h1>
+        <a href="form_submit.php" class="button">學生出場 - 提交表單</a>
+        <a href="輸入.html" class="button">輸入</a>
+        <a href="index.html" class="button">巡查員</a>
+        <a href="報表選擇.html" class="button">報表輸出</a>
+    </div>
+</body>
+</html>

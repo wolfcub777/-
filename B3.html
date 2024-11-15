@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>停車場管理系統</title>
+    <style>
+        .parking-lot {
+            max-width: 100%; /* 確保停車場背景圖寬度為100% */
+            height: auto;
+            display: block;
+        }
+
+        .parking-space {
+            cursor: pointer;
+            fill: rgba(0, 255, 0, 0.5); /* 半透明綠色代表空車位 */
+            stroke: black;
+            stroke-width: 1;
+        }
+
+        /* 滑鼠懸停時的效果 */
+        .parking-space:hover {
+            fill: red;
+        }
+
+        .parking-text {
+            font-size: 12px;
+            fill: black;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+    </style>
+</head>
+<body>
+    <h1>汽車停車場佈局</h1>
+    <div class="parking-lot-container">
+        <svg class="parking-lot" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+            <image href="B33.svg" x="0" y="0" width="100%" height="100%" />
+            <g class="parking-space" id="index" transform="translate(450, 750)">
+                <rect width="100" height="40" rx="5" ry="5" fill="green" />
+                <text class="parking-text" x="50" y="25">輸入</text>
+            </g>
+        </svg>
+    </div>
+
+    <button onclick="window.location.href='B2.html'" style="position: fixed; bottom: 10px; right: 10px; padding: 10px 20px;">
+        切換到 B2 停車場
+    </button>
+
+    <script>
+        document.querySelectorAll('.parking-space').forEach(function (space) {
+            space.addEventListener('click', function () {
+                window.location.href = 'index3.html'; // 修改後：跳轉到 index3.html
+            });
+        });
+    </script>
+</body>
+</html>

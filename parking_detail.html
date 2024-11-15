@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>停車位詳情</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        input[type="text"] {
+            width: 300px;
+            height: 30px;
+            font-size: 18px;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        #parking-id {
+            font-size: 32px; /* 調整字體大小為32px */
+        }
+    </style>
+</head>
+<body>
+    <h1 id="title">停車位詳情 - 第一次</h1>
+    <p>停車位編號: <span id="parking-id"></span></p>
+    
+    <input type="text" id="text-input" placeholder="描述">
+    <br>
+    
+    <button id="confirm-btn" onclick="confirmData()">確認567567</button>
+    <button id="modify-btn" onclick="enableEditing()">修改</button>
+    <button onclick="clearInputs()">清除</button>
+    <button onclick="goBack()">返回</button>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const parkingId = urlParams.get('id');
+        const period = urlParams.get('period');
+        document.getElementById('parking-id').textContent = parkingId;
+
+        const titleElement = document.getElementById('title');
+        const periodMap = {
+            first: '第一次',
+            second: '第二次',
+            third: '第三次'
+        };
+        titleElement.textContent = `停車位詳情 - ${periodMap[period]}`;
+
+        let parkingData = JSON.parse(localStorage.getItem('parkingData')) || {
+            first: Array(100).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false, lastModified: '' })),
+            second: Array(100).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false, lastModified: '' })),
+            third: Array(100).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false, lastModified: '' }))
+        };
+
+        const currentSpace = parkingData[period].find(space => space.id == parkingId);
+        document.getElementById('text-input').value = currentSpace.description;
+
+        document.getElementById('text-input').disabled = !!currentSpace.description;
+        document.getElementById('confirm-btn').disabled = !currentSpace.description;
+
+        document.getElementById('text-input').addEventListener('input', function() {
+            document.getElementById('confirm-btn').disabled = document.getElementById('text-input').value.trim() === '';
+        });
+
+        function confirmData() {
+            const textValue = document.getElementById('text-input').value.trim();
+            if (!textValue) {
+                currentSpace.status = 'available';
+                currentSpace.description = '';
+            } else {
+                currentSpace.status = 'not-available';
+                currentSpace.description = textValue;
+            }
+            const currentDateTime = new Date().toLocaleString();
+            currentSpace.lastModified = currentDateTime;
+            localStorage.setItem('parkingData', JSON.stringify(parkingData));
+            window.location.href = 'index.html';
+        }
+
+        function enableEditing() {
+            document.getElementById('text-input').disabled = false;
+            document.getElementById('confirm-btn').disabled = false;
+        }
+
+        function clearInputs() {
+            document.getElementById('text-input').value = '';
+            document.getElementById('text-input').focus();
+            document.getElementById('confirm-btn').disabled = true;
+        }
+
+        function goBack() {
+            window.location.href = 'index.html'; // Adjust the link as needed
+        }
+    </script>
+</body>
+</html>

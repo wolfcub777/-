@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>停車格詳情 (313-327)</title>
+    <style>
+        .parking-lot {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 停車格兩列 */
+            grid-gap: 10px;
+            justify-content: center;
+            margin: 20px auto;
+            width: max-content;
+        }
+
+        .parking-spot {
+            width: 100px;
+            height: 60px;
+            background-color: lightgray;
+            border: 1px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .occupied {
+            background-color: red; /* 已占用的車位 */
+        }
+
+        .available {
+            background-color: green; /* 空車位 */
+        }
+
+        .hover-highlight:hover {
+            background-color: yellow; /* 滑鼠懸停的效果 */
+        }
+
+        .back-button {
+            margin: 20px auto;
+            display: block;
+            text-align: center;
+            font-size: 18px;
+            text-decoration: none;
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="text-align: center;">停車位詳情 (313-327)</h2>
+
+    <div class="parking-lot">
+        <div class="parking-spot available hover-highlight">313</div>
+        <div class="parking-spot occupied hover-highlight">314</div>
+        <div class="parking-spot available hover-highlight">315</div>
+        <div class="parking-spot occupied hover-highlight">316</div>
+        <div class="parking-spot available hover-highlight">317</div>
+        <div class="parking-spot occupied hover-highlight">318</div>
+        <div class="parking-spot available hover-highlight">319</div>
+        <div class="parking-spot occupied hover-highlight">320</div>
+        <div class="parking-spot available hover-highlight">321</div>
+        <div class="parking-spot occupied hover-highlight">322</div>
+        <div class="parking-spot available hover-highlight">323</div>
+        <div class="parking-spot occupied hover-highlight">324</div>
+        <div class="parking-spot available hover-highlight">325</div>
+        <div class="parking-spot occupied hover-highlight">326</div>
+        <div class="parking-spot available hover-highlight">327</div>
+    </div>
+
+    <!-- 返回按鈕 -->
+    <a href="index.html" class="back-button">返回主頁</a>
+
+</body>
+</html>

@@ -1,0 +1,4 @@
+車輛種類統計報表 (vehicleTypeReport.php)
+每日停車次數統計報表 (dailyParkingReport.php)
+車輛停留時長報表 (parkingDurationReport.php)
+連結資料庫 (db_connection.php)

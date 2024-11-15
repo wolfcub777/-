@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>停車位輸入內容表格 - Index3</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        .filter-buttons button, .back-grey-btn {
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .filter-buttons button:hover {
+            background-color: #ddd;
+        }
+        .back-grey-btn {
+            background-color: #B0B0B0;
+            color: white;
+        }
+        .back-grey-btn:hover {
+            background-color: #A0A0A0;
+        }
+    </style>
+</head>
+<body>
+    <h1>停車位輸入內容表格 - Index3</h1>
+    <div class="filter-buttons">
+        <button onclick="filterTable('first')">第一次</button>
+        <button onclick="filterTable('second')">第二次</button>
+        <button onclick="filterTable('third')">第三次</button>
+        <button onclick="exportToCsv()">匯出Excel</button>
+        <button onclick="importToDatabase()">匯入資料到資料庫</button>
+        <button class="back-grey-btn" onclick="window.location.href='合體巨獸.html'">回合體巨獸</button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>停車位編號</th>
+                <th>描述</th>
+                <th>狀態</th>
+                <th>最後修改時間</th>
+            </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+    </table>
+    <button onclick="goBack()">返回</button>
+
+    <!-- 確保此路徑正確 -->
+    <script src="parkingData2.js"></script>
+
+    <script>
+        if (typeof parkingData !== 'undefined') {
+            console.log('已成功載入 parkingData2.js 資料');
+        } else {
+            console.error('無法載入 parkingData2.js 中的資料');
+            alert('無法載入資料，請檢查檔案位置或格式。');
+        }
+
+        // 顯示指定時段的停車位資料
+        function filterTable(period) {
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+            if (parkingData[period]) {
+                parkingData[period].forEach(space => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${space.id}</td><td>${space.description || '無描述'}</td><td>${space.status === 'available' ? '可用' : '不可用'}</td><td>${space.lastModified || '無記錄'}</td>`;
+                    tableBody.appendChild(row);
+                });
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="4">沒有資料</td></tr>';
+            }
+        }
+
+        // 匯出資料為 CSV 檔案
+        function exportToCsv() {
+            let csvContent = "\uFEFF停車位編號,描述,狀態,最後修改時間\n";
+            Object.keys(parkingData).forEach(period => {
+                parkingData[period].forEach(space => {
+                    csvContent += `${space.id},${space.description},${space.status},${space.lastModified}\n`;
+                });
+            });
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'parking_data.csv';
+            link.click();
+        }
+
+        // 將資料匯入資料庫
+        function importToDatabase() {
+            console.log('正在匯入資料...', parkingData);
+            fetch('import_data.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(parkingData)
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('伺服器回應:', data);
+                alert(data);
+            })
+            .catch(error => {
+                console.error('匯入失敗:', error);
+                alert('匯入失敗，請檢查伺服器設定。');
+            });
+        }
+
+        // 返回上一頁
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>
