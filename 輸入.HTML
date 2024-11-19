@@ -6,143 +6,133 @@
     <title>資料輸入表單</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f7f7f7;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff; /* 保持背景純白 */
             margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1000px;
-            margin: auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-        }
-        form {
-            width: 100%;
-            margin-bottom: 30px;
-        }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-top: 10px;
-        }
-        input[type="text"], input[type="password"], select {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0 20px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .button-group {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
+            align-items: center;
+            min-height: 100vh;
         }
-        button {
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            grid-template-rows: auto 1fr;
+            gap: 20px;
+            width: 90%;
+            max-width: 1400px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 2px solid #000; /* 外框黑色邊框 */
+            overflow: hidden;
+        }
+        .button-section {
+            grid-row: span 2;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-right: 2px solid #000; /* 右側黑色邊框 */
+        }
+        .button-section button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .button-section button:hover {
+            background-color: #0056b3;
+        }
+        .form-section {
+            grid-column: 2 / 3;
+            padding: 20px;
+        }
+        .form-section form label {
+            font-weight: 600;
+            display: block;
+            margin-top: 15px;
+        }
+        .form-section input[type="text"], .form-section input[type="password"], .form-section select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .csv-section {
+            grid-column: 2 / 3;
+            padding: 20px;
+            text-align: center;
+            border-top: 2px solid #000; /* 上方黑色邊框 */
+        }
+        .csv-section form {
+            display: inline-block;
+        }
+        .csv-section input[type="file"] {
+            margin-top: 10px;
+        }
+        .csv-section button {
             background-color: #28a745;
             color: white;
             padding: 10px 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
             margin-top: 10px;
         }
-        button:hover {
+        .csv-section button:hover {
             background-color: #218838;
-        }
-        .csv-import-area {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 20px;
-        }
-        .csv-import {
-            background-color: #f1f1f1;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        .csv-import input[type="file"] {
-            padding: 5px;
-        }
-        .csv-import button {
-            margin-left: 10px;
-        }
-        .back-grey-btn {
-            background-color: #B0B0B0;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 10px;
-        }
-        .back-grey-btn:hover {
-            background-color: #A0A0A0;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>使用者資料輸入表單</h1>
-        <form id="userForm">
-            <label for="account">帳號:</label>
-            <input type="text" id="account" name="account" required>
-
-            <label for="name">名字:</label>
-            <input type="text" id="name" name="name" required>
-
-            <label for="identity">身份:</label>
-            <select id="identity" name="identity" required>
-                <option value="學生">學生</option>
-                <option value="教職員">教職員</option>
-            </select>
-
-            <label for="contactInfo">聯絡資訊:</label>
-            <input type="text" id="contactInfo" name="contactInfo" required>
-
-            <label for="password">密碼:</label>
-            <input type="password" id="password" name="password" required>
-
-            <label for="vehicleType">車輛類型:</label>
-            <select id="vehicleType" name="vehicleType" required>
-                <option value="汽車">汽車</option>
-                <option value="機車">機車</option>
-            </select>
-
-            <label for="plateNumber">車牌號碼:</label>
-            <input type="text" id="plateNumber" name="plateNumber" required>
-
-            <div class="button-group">
-                <button type="button" onclick="submitData()">提交資料</button>
-                <button type="button" onclick="viewSubmittedData()">查看已提交資料</button>
-                <button type="button" onclick="saveToDatabase()">結束並匯入資料庫</button>
-                <button type="button" onclick="queryHistory()">查詢歷史資料</button>
-                <button type="button" onclick="window.location.href='review_interface.php'">審核申請</button>
-                <button type="button" class="back-grey-btn" onclick="window.location.href='合體巨獸.html'">回合體巨獸</button> <!-- 新增的灰色按鈕 -->
-            </div>
-        </form>
-
-        <div class="csv-import-area">
-            <div class="csv-import">
-                <h2>匯入 CSV 資料</h2>
-                <form action="importCsv.php" method="POST" enctype="multipart/form-data" onsubmit="return validateCsvInput()">
-                    <input type="file" name="csv_file" id="csv_file" accept=".csv">
-                    <button type="submit">匯入 CSV</button>
-                </form>
-            </div>
+        <div class="button-section">
+            <button onclick="submitData()">提交資料</button>
+            <button onclick="viewSubmittedData()">查看已提交資料</button>
+            <button onclick="saveToDatabase()">結束並匯入資料庫</button>
+            <button onclick="queryHistory()">查詢歷史資料</button>
+            <button onclick="window.location.href='review_interface.php'">審核申請</button>
+            <button onclick="window.location.href='合體巨獸.html'">回合體巨獸</button>
         </div>
-
-        <div id="submittedCount"></div>
+        <div class="form-section">
+            <form id="userForm">
+                <label for="account">帳號:</label>
+                <input type="text" id="account" name="account" required>
+                <label for="name">名字:</label>
+                <input type="text" id="name" name="name" required>
+                <label for="identity">身份:</label>
+                <select id="identity" name="identity" required>
+                    <option value="學生">學生</option>
+                    <option value="教職員">教職員</option>
+                </select>
+                <label for="contactInfo">聯絡資訊:</label>
+                <input type="text" id="contactInfo" name="contactInfo" required>
+                <label for="password">密碼:</label>
+                <input type="password" id="password" name="password" required>
+                <label for="vehicleType">車輛類型:</label>
+                <select id="vehicleType" name="vehicleType" required>
+                    <option value="汽車">汽車</option>
+                    <option value="機車">機車</option>
+                </select>
+                <label for="plateNumber">車牌號碼:</label>
+                <input type="text" id="plateNumber" name="plateNumber" required>
+            </form>
+        </div>
+        <div class="csv-section">
+            <form action="importCsv.php" method="POST" enctype="multipart/form-data" onsubmit="return validateCsvInput()">
+                <h2>匯入 CSV 資料</h2>
+                <input type="file" name="csv_file" id="csv_file" accept=".csv">
+                <button type="submit">匯入 CSV</button>
+            </form>
+        </div>
     </div>
+
 
     <script>
         let dataStore = JSON.parse(localStorage.getItem("submittedData")) || [];
