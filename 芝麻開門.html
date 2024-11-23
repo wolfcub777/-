@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>康寧大學停車管理系統 - 停車場權限管理登入</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            background: linear-gradient(135deg, #a8e6cf, #56b893);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 100px;
+        }
+        .login-container {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 40px;
+            width: 450px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .login-container::before,
+        .login-container::after {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #74ebd5, #9face6);
+            z-index: -1;
+        }
+        .login-container::before {
+            top: -70px;
+            left: -70px;
+        }
+        .login-container::after {
+            bottom: -70px;
+            right: -70px;
+        }
+        h1 {
+            font-size: 2.4em;
+            color: #333333;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        label {
+            font-size: 1.4em;
+            color: #555555;
+            display: block;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 15px;
+            margin: 15px 0 25px 0;
+            border: 1px solid #cccccc;
+            border-radius: 8px;
+            font-size: 1.5em;
+            transition: 0.3s;
+        }
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #74ebd5;
+            box-shadow: 0 0 8px rgba(116, 235, 213, 0.5);
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        p {
+            font-size: 1.2em;
+            color: #888888;
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        async function validateLogin(event) {
+            event.preventDefault(); // Prevent form submission
+            const account = document.getElementById('account').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('validate_login.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ account, password })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    switch (result.role) {
+                        case '學生':
+                        case '教職員':
+                            window.location.href = '學生.HTML';
+                            break;
+                        case '總務處':
+                            window.location.href = 'general_affairs.html';
+                            break;
+                        case '巡查員':
+                            window.location.href = '巡查員.HTML';
+                            break;
+                        case '學務處':
+                            window.location.href = 'student_affairs.html';
+                            break;
+                        case '管理員':
+                            window.location.href = 'admin_dashboard.html';
+                            break;
+                        default:
+                            alert('無效的身份！');
+                    }
+                } else {
+                    alert('帳號或密碼錯誤，請重新輸入！');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('登入時發生錯誤，請稍後再試！');
+            }
+        }
+
+        async function validateLoginDatabase(event) {
+            event.preventDefault(); // Prevent form submission
+            const account = document.getElementById('account').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('validate_login.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ account, password })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    const role = await fetchUserRole(account, password);
+                    switch (role) {
+                        case '學生':
+                        case '教職員':
+                            window.location.href = '學生.HTML';
+                            break;
+                        case '總務處':
+                            window.location.href = 'general_affairs.html';
+                            break;
+                        case '巡查員':
+                            window.location.href = '巡查員.HTML';
+                            break;
+                        case '學務處':
+                            window.location.href = 'student_affairs.html';
+                            break;
+                        case '管理員':
+                            window.location.href = 'admin_dashboard.html';
+                            break;
+                        default:
+                            alert('無效的身份！');
+                    }
+                } else {
+                    alert('帳號或密碼錯誤，請重新輸入！');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('登入時發生錯誤，請稍後再試！');
+            }
+        }
+
+        async function fetchUserRole(account, password) {
+            try {
+                const response = await fetch('fetch_role.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ account, password })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    return result.role;
+                } else {
+                    throw new Error('無法取得使用者身份');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                return null;
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="login-container">
+        <h1>康寧大學停車管理系統</h1>
+        <form onsubmit="validateLoginDatabase(event)">
+            <label for="account">請輸入帳號：</label>
+            <input type="text" id="account" name="account" required placeholder="帳號">
+            <label for="password">請輸入密碼：</label>
+            <input type="password" id="password" name="password" required placeholder="密碼">
+            <button type="submit">登入系統</button>
+        </form>
+        <p>請使用分配的帳號與密碼登入。</p>
+    </div>
+</body>
+</html>
