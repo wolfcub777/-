@@ -16,7 +16,7 @@ if ($conn->connect_error) {
 $data = json_decode(file_get_contents('php://input'), true);
 
 // 對於每個時段的資料，分別匯入對應的資料表
-foreach (['first' => 'm1', 'second' => 'm2', 'third' => 'm3'] as $period => $tableName) {
+foreach (['first' => 'c1', 'second' => 'c2', 'third' => 'c3'] as $period => $tableName) {
     if (isset($data[$period])) {
         // 檢查資料表是否存在，若不存在則建立
         $createTableSql = "CREATE TABLE IF NOT EXISTS `$tableName` (
@@ -31,11 +31,18 @@ foreach (['first' => 'm1', 'second' => 'm2', 'third' => 'm3'] as $period => $tab
             exit;
         }
 
+        // 確認 'lastModified' 欄位是否存在，若不存在則新增
+        $addColumnSql = "ALTER TABLE `$tableName` ADD COLUMN IF NOT EXISTS `lastModified` VARCHAR(50)";
+        if ($conn->query($addColumnSql) === FALSE) {
+            echo "新增欄位失敗: " . $conn->error;
+            exit;
+        }
+
         foreach ($data[$period] as $space) {
             $id = $space['id'];
             $status = $space['status'];
             $description = $space['description'];
-            $lastModified = isset($space['lastModified']) ? $space['lastModified'] : ''; // 檢查 lastModified 是否存在
+            $lastModified = isset($space['lastModified']) ? $space['lastModified'] : '';
 
             // 使用 ON DUPLICATE KEY UPDATE 來避免重複插入
             $sql = "INSERT INTO `$tableName` (id, status, description, lastModified) VALUES (?, ?, ?, ?) 

@@ -30,7 +30,14 @@
         }
 
         #parking-id {
-            font-size: 32px; /* 調整字體大小為32px */
+            font-size: 32px;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -40,11 +47,13 @@
     
     <input type="text" id="text-input" placeholder="描述">
     <br>
-    
-    <button id="confirm-btn" onclick="confirmData()">確認567567</button>
-    <button id="modify-btn" onclick="enableEditing()">修改</button>
-    <button onclick="clearInputs()">清除</button>
-    <button onclick="goBack()">返回</button>
+
+    <div class="button-group">
+        <button id="confirm-btn" onclick="confirmData()">確認</button>
+        <button id="modify-btn" onclick="enableEditing()">修改</button>
+        <button onclick="clearInputs()">清除</button>
+        <button onclick="goBack()">返回</button>
+    </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -60,10 +69,11 @@
         };
         titleElement.textContent = `停車位詳情 - ${periodMap[period]}`;
 
-        let parkingData = JSON.parse(localStorage.getItem('parkingData')) || {
-            first: Array(100).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false, lastModified: '' })),
-            second: Array(100).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false, lastModified: '' })),
-            third: Array(100).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false, lastModified: '' }))
+        const parkingDataKey = 'parkingDataBike'; // 修改為對應的 key，確保與機車資料分開
+        let parkingData = JSON.parse(localStorage.getItem(parkingDataKey)) || {
+            first: Array(454).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false, lastModified: '' })),
+            second: Array(454).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false, lastModified: '' })),
+            third: Array(454).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false, lastModified: '' }))
         };
 
         const currentSpace = parkingData[period].find(space => space.id == parkingId);
@@ -87,7 +97,10 @@
             }
             const currentDateTime = new Date().toLocaleString();
             currentSpace.lastModified = currentDateTime;
-            localStorage.setItem('parkingData', JSON.stringify(parkingData));
+            localStorage.setItem(parkingDataKey, JSON.stringify(parkingData));
+            alert('資料已更新');
+
+            // 確認後回到 index.html
             window.location.href = 'index.html';
         }
 
@@ -103,7 +116,7 @@
         }
 
         function goBack() {
-            window.location.href = 'index.html'; // Adjust the link as needed
+            window.location.href = 'index.html';
         }
     </script>
 </body>

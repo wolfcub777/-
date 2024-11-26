@@ -36,32 +36,6 @@
             max-width: 400px;
             margin: 40px auto;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-            position: relative;
-        }
-
-        .help-icon {
-            position: absolute;
-            top: -20px;
-            right: -20px;
-            width: 40px;
-            height: 40px;
-            background-color: #28a745;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            cursor: pointer;
-        }
-
-        .help-icon:hover {
-            background-color: #218838;
-        }
-
-        .help-icon span {
-            color: #ffffff;
-            font-size: 24px;
-            font-weight: bold;
         }
 
         label {
@@ -162,9 +136,9 @@
                 PRIMARY KEY (id_number, parking_number, license_plate)
             )";
         if ($conn->query($sql_create_table) === TRUE) {
-            echo "<p class='message'>已建立資料表 parking_entries。</p>";
+            echo "<p style='text-align: center;'>已建立資料表 parking_entries。</p>";
         } else {
-            die("<p class='message'>建立資料表失敗: " . $conn->error . "</p>");
+            die("<p style='text-align: center;'>建立資料表失敗: " . $conn->error . "</p>");
         }
     }
 
@@ -186,7 +160,7 @@
         $result_duplicate = $conn->query($check_duplicate);
 
         if ($result_duplicate->num_rows > 0) {
-            echo "<p class='message'>該學號/教職員編號、停車格與車牌的記錄已存在，請勿重複提交。</p>";
+            echo "<p style='text-align: center;'>該學號/教職員編號、停車格與車牌的記錄已存在，請勿重複提交。</p>";
         } else {
             // 判斷車牌號碼是否為認證車牌
             $marked = in_array($license_plate, $authorized_license_plates) ? 1 : 0;
@@ -196,9 +170,9 @@
                            VALUES ('$id_number', '$parking_number', '$license_plate', '$exit_time', $marked)";
 
             if ($conn->query($sql_insert) === TRUE) {
-                echo "<p class='message'>資料已提交。" . ($marked ? " 並已標記為認證車牌。" : " 未標記。") . "</p>";
+                echo "<p style='text-align: center;'>資料已提交。" . ($marked ? " 並已標記為認證車牌。" : " 未標記。") . "</p>";
             } else {
-                echo "<p class='message'>提交失敗: " . $conn->error . "</p>";
+                echo "<p style='text-align: center;'>提交失敗: " . $conn->error . "</p>";
             }
         }
     }
@@ -207,11 +181,6 @@
     ?>
 
     <form action="" method="POST">
-        <!-- 問號按鈕 -->
-        <div class="help-icon" onclick="alert('功能說明：判斷車牌號碼是否為認證車牌,自動建立資料表,查看歷史紀錄,確認是否被標記')">
-            <span>?</span>
-        </div>
-
         <label for="id_number">學號/教職員編號:</label>
         <input type="text" id="id_number" name="id_number" required><br><br>
 
@@ -226,7 +195,7 @@
 
         <button type="submit" name="submit">提交</button>
         <button type="button" class="history-button" onclick="window.location.href='view_history.php'">查看歷史紀錄</button>
-        <button type="button" onclick="window.location.href='合體巨獸.html'">返回主頁</button>
+        <button type="button" class="back-button" onclick="window.location.href='合體巨獸.html'">返回主頁</button>
     </form>
 </body>
 </html>

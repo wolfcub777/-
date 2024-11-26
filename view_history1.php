@@ -133,6 +133,6 @@
     $conn->close();
     ?>
 
-    <a href="form_submit.php" class="back-button">返回輸入頁面</a>
+    <a href="總務處.HTML" class="back-button">返回</a>
 </body>
 </html>

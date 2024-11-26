@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>已提交資料</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            padding: 20px;
+            text-align: center;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .data-list {
+            text-align: left;
+            margin: 20px auto;
+            max-width: 1000px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        input[type="text"], select {
+            width: 95%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        select {
+            width: 100px;
+        }
+        input:disabled, select:disabled {
+            background-color: #f0f0f0;
+            color: #555;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>已提交資料</h1>
+    <p>已提交 <span id="submittedCount">0</span> 筆資料</p>
+    <div class="data-list">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>帳號</th>
+                    <th>名字</th>
+                    <th>身份</th>
+                    <th>聯絡資訊</th>
+                    <th>密碼</th>
+                    <th>車輛類型</th>
+                    <th>車牌號碼</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="dataList">
+                <!-- 這裡將顯示已提交的資料 -->
+            </tbody>
+        </table>
+    </div>
+    <div class="button-group">
+        <button onclick="goBack()">返回</button>
+    </div>
+
+    <script>
+        // 使用 LocalStorage 保存資料
+        let dataStore = JSON.parse(localStorage.getItem("submittedData")) || [];
+
+        // 載入已提交的資料
+        function loadSubmittedData() {
+            const countElement = document.getElementById("submittedCount");
+            const dataListElement = document.getElementById("dataList");
+
+            countElement.textContent = dataStore.length;
+            dataListElement.innerHTML = "";
+
+            dataStore.forEach((data, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td><input type="text" value="${data.account}" id="account_${index}" disabled></td>
+                    <td><input type="text" value="${data.name}" id="name_${index}" disabled></td>
+                    <td><input type="text" value="${data.identity}" id="identity_${index}" disabled></td>
+                    <td><input type="text" value="${data.contactInfo}" id="contactInfo_${index}" disabled></td>
+                    <td><input type="text" value="${data.password}" id="password_${index}" disabled></td>
+                    <td>
+                        <select id="vehicleType_${index}" disabled>
+                            <option value="汽車" ${data.vehicleType === '汽車' ? 'selected' : ''}>汽車</option>
+                            <option value="機車" ${data.vehicleType === '機車' ? 'selected' : ''}>機車</option>
+                        </select>
+                    </td>
+                    <td><input type="text" value="${data.plateNumber}" id="plateNumber_${index}" disabled></td>
+                    <td>
+                        <div class="button-group">
+                            <button id="edit_${index}" onclick="enableEdit(${index})">更改</button>
+                            <button onclick="deleteData(${index})">刪除</button>
+                        </div>
+                    </td>
+                `;
+                dataListElement.appendChild(row);
+            });
+        }
+
+        // 啟用編輯功能
+        function enableEdit(index) {
+            document.getElementById(`account_${index}`).disabled = false;
+            document.getElementById(`name_${index}`).disabled = false;
+            document.getElementById(`identity_${index}`).disabled = false;
+            document.getElementById(`contactInfo_${index}`).disabled = false;
+            document.getElementById(`password_${index}`).disabled = false;
+            document.getElementById(`vehicleType_${index}`).disabled = false;
+            document.getElementById(`plateNumber_${index}`).disabled = false;
+            document.getElementById(`edit_${index}`).textContent = '確定';
+            document.getElementById(`edit_${index}`).onclick = function() { saveEdit(index); };
+        }
+
+        // 保存編輯後的資料
+        function saveEdit(index) {
+            // 更新資料
+            dataStore[index].account = document.getElementById(`account_${index}`).value;
+            dataStore[index].name = document.getElementById(`name_${index}`).value;
+            dataStore[index].identity = document.getElementById(`identity_${index}`).value;
+            dataStore[index].contactInfo = document.getElementById(`contactInfo_${index}`).value;
+            dataStore[index].password = document.getElementById(`password_${index}`).value;
+            dataStore[index].vehicleType = document.getElementById(`vehicleType_${index}`).value;
+            dataStore[index].plateNumber = document.getElementById(`plateNumber_${index}`).value;
+
+            // 保存至 LocalStorage
+            localStorage.setItem("submittedData", JSON.stringify(dataStore));
+
+            // 禁用編輯並恢復按鈕狀態
+            document.getElementById(`account_${index}`).disabled = true;
+            document.getElementById(`name_${index}`).disabled = true;
+            document.getElementById(`identity_${index}`).disabled = true;
+            document.getElementById(`contactInfo_${index}`).disabled = true;
+            document.getElementById(`password_${index}`).disabled = true;
+            document.getElementById(`vehicleType_${index}`).disabled = true;
+            document.getElementById(`plateNumber_${index}`).disabled = true;
+            document.getElementById(`edit_${index}`).textContent = '更改';
+            document.getElementById(`edit_${index}`).onclick = function() { enableEdit(index); };
+
+            alert("修改已保存！");
+        }
+
+        // 刪除資料
+        function deleteData(index) {
+            dataStore.splice(index, 1);
+            localStorage.setItem("submittedData", JSON.stringify(dataStore));
+            loadSubmittedData(); // 重新載入資料
+        }
+
+        // 返回上一頁
+        function goBack() {
+            window.location.href = '輸入1.html'; // 返回資料輸入頁面
+        }
+
+        loadSubmittedData(); // 初始化顯示已提交資料
+    </script>
+</body>
+</html>

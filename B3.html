@@ -18,6 +18,7 @@
             stroke-width: 1;
         }
 
+      
         /* 滑鼠懸停時的效果 */
         .parking-space:hover {
             fill: red;
@@ -29,6 +30,7 @@
             text-anchor: middle;
             dominant-baseline: middle;
         }
+		
     </style>
 </head>
 <body>
@@ -50,7 +52,7 @@
     <script>
         document.querySelectorAll('.parking-space').forEach(function (space) {
             space.addEventListener('click', function () {
-                window.location.href = 'index3.html'; // 修改後：跳轉到 index3.html
+                window.location.href = 'index.html'; // 跳轉到 index.html
             });
         });
     </script>

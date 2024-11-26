@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>停車位輸入內容表格 - Index3</title>
+    <title>停車位輸入內容表格</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin-top: 50px;
+            background-color: #f4f4f4;
         }
         table {
             width: 90%;
             margin: 20px auto;
             border-collapse: collapse;
+            background-color: #fff;
         }
         table, th, td {
             border: 1px solid black;
@@ -21,6 +23,10 @@
         th, td {
             padding: 10px;
             text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
         }
         .filter-buttons button, .back-grey-btn {
             margin: 5px;
@@ -43,7 +49,7 @@
     </style>
 </head>
 <body>
-    <h1>停車位輸入內容表格 - Index3</h1>
+    <h1>停車位輸入內容表格</h1>
     <div class="filter-buttons">
         <button onclick="filterTable('first')">第一次</button>
         <button onclick="filterTable('second')">第二次</button>
@@ -63,24 +69,23 @@
         </thead>
         <tbody id="table-body"></tbody>
     </table>
-    <button onclick="goBack()">返回</button>
+    <button onclick="window.location.href='index3.html'">返回</button>
 
-    <!-- 確保此路徑正確 -->
-    <script src="parkingData2.js"></script>
-
+    <!-- 引入 SheetJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        if (typeof parkingData !== 'undefined') {
-            console.log('已成功載入 parkingData2.js 資料');
-        } else {
-            console.error('無法載入 parkingData2.js 中的資料');
-            alert('無法載入資料，請檢查檔案位置或格式。');
-        }
+        const parkingDataKey = 'parkingDataCar'; // 修改為對應的 key，確保與汽車資料分開
+        let parkingData = JSON.parse(localStorage.getItem(parkingDataKey)) || {
+            first: Array(70).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', lastModified: '' })),
+            second: Array(70).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', lastModified: '' })),
+            third: Array(70).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', lastModified: '' }))
+        };
 
-        // 顯示指定時段的停車位資料
         function filterTable(period) {
             const tableBody = document.getElementById('table-body');
             tableBody.innerHTML = '';
-            if (parkingData[period]) {
+
+            if (parkingData[period] && parkingData[period].length > 0) {
                 parkingData[period].forEach(space => {
                     const row = document.createElement('tr');
                     row.innerHTML = `<td>${space.id}</td><td>${space.description || '無描述'}</td><td>${space.status === 'available' ? '可用' : '不可用'}</td><td>${space.lastModified || '無記錄'}</td>`;
@@ -91,44 +96,59 @@
             }
         }
 
-        // 匯出資料為 CSV 檔案
-        function exportToCsv() {
-            let csvContent = "\uFEFF停車位編號,描述,狀態,最後修改時間\n";
-            Object.keys(parkingData).forEach(period => {
-                parkingData[period].forEach(space => {
-                    csvContent += `${space.id},${space.description},${space.status},${space.lastModified}\n`;
-                });
-            });
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'parking_data.csv';
-            link.click();
-        }
-
-        // 將資料匯入資料庫
         function importToDatabase() {
-            console.log('正在匯入資料...', parkingData);
-            fetch('import_data.php', {
+            const url = 'import_data2.php'; // 直接使用您現有的 import_data2.php
+            const data = { 
+                first: parkingData.first,
+                second: parkingData.second,
+                third: parkingData.third
+            };
+
+            fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(parkingData)
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
             })
             .then(response => response.text())
-            .then(data => {
-                console.log('伺服器回應:', data);
-                alert(data);
+            .then(result => {
+                alert(result); // 從 PHP 返回的訊息
             })
             .catch(error => {
-                console.error('匯入失敗:', error);
-                alert('匯入失敗，請檢查伺服器設定。');
+                console.error('匯入過程中發生錯誤:', error);
+                alert('資料匯入過程中發生錯誤，請稍後再試。');
             });
         }
 
-        // 返回上一頁
-        function goBack() {
-            window.history.back();
+        function exportToCsv() {
+            // 建立新的工作簿（Workbook）
+            const workbook = XLSX.utils.book_new();
+
+            // 為每個時段新增工作表（Sheet）
+            ['first', 'second', 'third'].forEach((period, index) => {
+                if (parkingData[period] && parkingData[period].length > 0) {
+                    // 將當前時段的資料轉換成 JSON 格式的陣列
+                    const data = parkingData[period].map(space => ({
+                        停車位編號: space.id,
+                        描述: space.description || '無描述',
+                        狀態: space.status === 'available' ? '可用' : '不可用',
+                        最後修改時間: space.lastModified || '無記錄'
+                    }));
+                    // 將資料轉換成工作表
+                    const worksheet = XLSX.utils.json_to_sheet(data);
+                    // 將工作表加入工作簿，工作表名稱為「第一次」「第二次」「第三次」
+                    const sheetName = ['第一次', '第二次', '第三次'][index];
+                    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+                }
+            });
+
+            // 將工作簿匯出為 Excel 檔案，檔案名稱為「停車位資料.xlsx」
+            XLSX.writeFile(workbook, '停車位資料.xlsx');
         }
+
+        // 預設載入第一次資料
+        filterTable('first');
     </script>
 </body>
 </html>

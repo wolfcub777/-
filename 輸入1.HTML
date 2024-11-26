@@ -115,12 +115,12 @@
 <body>
     <div class="container">
         <div class="button-section">
-            <button onclick="submitData()">提交資料</button>
+           <button onclick="submitData()">提交資料</button>
             <button onclick="viewSubmittedData()">查看已提交資料</button>
             <button onclick="saveToDatabase()">結束並匯入資料庫</button>
             <button onclick="queryHistory()">查詢歷史資料</button>
-            <button onclick="window.location.href='review_interface.php'">審核申請</button>
-            <button onclick="window.location.href='合體巨獸.html'">回合體巨獸</button>
+            <button onclick="window.location.href='review_interface1.php'">審核申請</button>
+            <button onclick="window.location.href='總務處.HTML'">返回</button>
         </div>
         <div class="form-section">
             <form id="userForm">
@@ -191,7 +191,7 @@
         }
 
         function viewSubmittedData() {
-            window.location.href = 'submitted_data.html';
+            window.location.href = 'submitted_data1.html';
         }
 
         function saveToDatabase() {
@@ -211,7 +211,7 @@
         }
 
         function queryHistory() {
-            window.location.href = 'history.php';
+            window.location.href = 'history1.php';
         }
 
         function validateCsvInput() {

@@ -93,125 +93,20 @@
             color: #888888;
             margin-top: 20px;
         }
+        .secondary-button {
+            margin-top: 15px;
+            background: #ff9800;
+            font-size: 1.2em;
+        }
+        .secondary-button:hover {
+            background: #e68a00;
+        }
     </style>
-    <script>
-        async function validateLogin(event) {
-            event.preventDefault(); // Prevent form submission
-            const account = document.getElementById('account').value;
-            const password = document.getElementById('password').value;
-
-            try {
-                const response = await fetch('validate_login.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ account, password })
-                });
-                const result = await response.json();
-
-                if (result.success) {
-                    switch (result.role) {
-                        case '學生':
-                        case '教職員':
-                            window.location.href = '學生.HTML';
-                            break;
-                        case '總務處':
-                            window.location.href = 'general_affairs.html';
-                            break;
-                        case '巡查員':
-                            window.location.href = '巡查員.HTML';
-                            break;
-                        case '學務處':
-                            window.location.href = 'student_affairs.html';
-                            break;
-                        case '管理員':
-                            window.location.href = 'admin_dashboard.html';
-                            break;
-                        default:
-                            alert('無效的身份！');
-                    }
-                } else {
-                    alert('帳號或密碼錯誤，請重新輸入！');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('登入時發生錯誤，請稍後再試！');
-            }
-        }
-
-        async function validateLoginDatabase(event) {
-            event.preventDefault(); // Prevent form submission
-            const account = document.getElementById('account').value;
-            const password = document.getElementById('password').value;
-
-            try {
-                const response = await fetch('validate_login.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ account, password })
-                });
-                const result = await response.json();
-
-                if (result.success) {
-                    const role = await fetchUserRole(account, password);
-                    switch (role) {
-                        case '學生':
-                        case '教職員':
-                            window.location.href = '學生.HTML';
-                            break;
-                        case '總務處':
-                            window.location.href = 'general_affairs.html';
-                            break;
-                        case '巡查員':
-                            window.location.href = '巡查員.HTML';
-                            break;
-                        case '學務處':
-                            window.location.href = 'student_affairs.html';
-                            break;
-                        case '管理員':
-                            window.location.href = 'admin_dashboard.html';
-                            break;
-                        default:
-                            alert('無效的身份！');
-                    }
-                } else {
-                    alert('帳號或密碼錯誤，請重新輸入！');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('登入時發生錯誤，請稍後再試！');
-            }
-        }
-
-        async function fetchUserRole(account, password) {
-            try {
-                const response = await fetch('fetch_role.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ account, password })
-                });
-                const result = await response.json();
-                if (result.success) {
-                    return result.role;
-                } else {
-                    throw new Error('無法取得使用者身份');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                return null;
-            }
-        }
-    </script>
 </head>
 <body>
     <div class="login-container">
         <h1>康寧大學停車管理系統</h1>
-        <form onsubmit="validateLoginDatabase(event)">
+        <form method="POST" action="validate_login.php">
             <label for="account">請輸入帳號：</label>
             <input type="text" id="account" name="account" required placeholder="帳號">
             <label for="password">請輸入密碼：</label>
@@ -219,6 +114,7 @@
             <button type="submit">登入系統</button>
         </form>
         <p>請使用分配的帳號與密碼登入。</p>
+        <button class="secondary-button" onclick="location.href='學生停車資格申請.html'">申請停車資格</button>
     </div>
 </body>
 </html>

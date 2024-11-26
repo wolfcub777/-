@@ -61,7 +61,7 @@
 
         .parking-lot {
             display: grid;
-            grid-template-columns: repeat(10, 100px);
+            grid-template-columns: repeat(6, 100px);
             gap: 10px;
             justify-content: center;
             margin-top: 20px;
@@ -115,11 +115,11 @@
         </div>
     </div>
 <button onclick="window.location.href='index.html'" style="position: fixed; bottom: 10px; right: 10px; padding: 10px 20px;">
-        機車輸入在這裡
+        返回機車停車場
     </button>
-	
     <script>
-        let parkingData = JSON.parse(localStorage.getItem('parkingData')) || {
+        const parkingDataKey = 'parkingDataCar'; // 使用獨立的 key 以確保與機車停車場資料分開
+        let parkingData = JSON.parse(localStorage.getItem(parkingDataKey)) || {
             first: Array(70).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false })),
             second: Array(70).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false })),
             third: Array(70).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false }))
@@ -157,7 +157,7 @@
         showParkingSpaces('first', 1, 36); // 預設顯示A區
 
         window.addEventListener('beforeunload', function() {
-            localStorage.setItem('parkingData', JSON.stringify(parkingData));
+            localStorage.setItem(parkingDataKey, JSON.stringify(parkingData));
         });
     </script>
 </body>

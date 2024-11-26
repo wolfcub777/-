@@ -26,19 +26,11 @@ function updateParkingSpace(index, period, description, status) {
         space.description = description;
         space.status = status;
         space.lastModified = new Date().toISOString();
-
-        // 將更新後的資料儲存到 localStorage
-        localStorage.setItem('parkingData2', JSON.stringify(parkingData));
     } else {
         console.error('索引超出範圍。');
     }
 }
 
-// 測試範例：更新第一時段第70個停車位
-updateParkingSpace(69, 'first', '已預訂', 'occupied');
-console.log(parkingData.first[69]); // 查看更新後的第70個停車位資訊
-
-// 在網頁載入或關閉時儲存資料到 localStorage
-window.addEventListener('beforeunload', function () {
-    localStorage.setItem('parkingData2', JSON.stringify(parkingData));
-});
+// 測試範例：更新第一時段第100個停車位
+updateParkingSpace69, 'first', '已預訂', 'occupied');
+console.log(parkingData.first[69]); // 查看更新後的第100個停車位資訊
