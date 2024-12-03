@@ -194,8 +194,7 @@
         <input type="datetime-local" id="exit_time" name="exit_time" required><br><br>
 
         <button type="submit" name="submit">提交</button>
-        <button type="button" class="history-button" onclick="window.location.href='view_history.php'">查看歷史紀錄</button>
-        <button type="button" class="back-button" onclick="window.location.href='合體巨獸.html'">返回主頁</button>
+        <button type="button" class="back-button" onclick="window.location.href='學生.html'">返回主頁</button>
     </form>
 </body>
 </html>
