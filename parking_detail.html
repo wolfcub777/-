@@ -33,6 +33,12 @@
             font-size: 32px;
         }
 
+        .unqualified-text {
+            color: red;
+            font-size: 20px;
+            margin-left: 10px;
+        }
+
         .button-group {
             display: flex;
             justify-content: center;
@@ -43,9 +49,9 @@
 </head>
 <body>
     <h1 id="title">停車位詳情 - 第一次</h1>
-    <p>停車位編號: <span id="parking-id"></span></p>
+    <p>停車位編號: <span id="parking-id"></span><span id="unqualified-text" class="unqualified-text"></span></p>
     
-    <input type="text" id="text-input" placeholder="描述">
+    <input type="text" id="text-input" placeholder="描述 (格式: AAA-1111)">
     <br>
 
     <div class="button-group">
@@ -71,36 +77,74 @@
 
         const parkingDataKey = 'parkingDataBike'; // 修改為對應的 key，確保與機車資料分開
         let parkingData = JSON.parse(localStorage.getItem(parkingDataKey)) || {
-            first: Array(454).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false, lastModified: '' })),
-            second: Array(454).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false, lastModified: '' })),
-            third: Array(454).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false, lastModified: '' }))
+            first: Array(454).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false, lastModified: '', isUnqualified: false })),
+            second: Array(454).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false, lastModified: '', isUnqualified: false })),
+            third: Array(454).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', updated: false, lastModified: '', isUnqualified: false }))
         };
 
         const currentSpace = parkingData[period].find(space => space.id == parkingId);
         document.getElementById('text-input').value = currentSpace.description;
 
-        document.getElementById('text-input').disabled = !!currentSpace.description;
-        document.getElementById('confirm-btn').disabled = !currentSpace.description;
+        updateUnqualifiedText(currentSpace.isUnqualified);
 
-        document.getElementById('text-input').addEventListener('input', function() {
-            document.getElementById('confirm-btn').disabled = document.getElementById('text-input').value.trim() === '';
-        });
+        document.getElementById('text-input').disabled = !!currentSpace.description;
 
         function confirmData() {
             const textValue = document.getElementById('text-input').value.trim();
-            if (!textValue) {
+            
+            // 空白輸入狀況下的操作
+            if (textValue === "") {
+                alert('描述為空值，將標記為可用狀態。');
                 currentSpace.status = 'available';
-                currentSpace.description = '';
-            } else {
-                currentSpace.status = 'not-available';
                 currentSpace.description = textValue;
+                currentSpace.isUnqualified = false;
+            } else {
+                // 非空輸入狀況下進行車牌比對
+                if (!/^[A-Z]{3}-\d{4}$/.test(textValue)) {
+                    alert('輸入格式錯誤！請輸入正確的格式 (AAA-1111)');
+                    return;
+                }
+                
+                // 車牌比對功能
+                fetch('check_license_plate.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ licensePlate: textValue })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.found) {
+                        alert('車牌比對成功：合格');
+                        currentSpace.isUnqualified = false; // 合格狀態
+                    } else {
+                        alert('找不到匹配的車牌號碼：不合格');
+                        currentSpace.isUnqualified = true; // 不合格狀態
+                    }
+                    
+                    currentSpace.status = 'not-available';
+                    currentSpace.description = textValue;
+                    currentSpace.lastModified = new Date().toLocaleString();
+                    localStorage.setItem(parkingDataKey, JSON.stringify(parkingData));
+                    
+                    updateUnqualifiedText(currentSpace.isUnqualified);
+                    
+                    alert('資料已更新');
+                    window.location.href = 'index.html';
+                })
+                .catch(error => {
+                    console.error('查詢過程中發生錯誤:', error);
+                    alert('查詢過程中發生錯誤，請稍後再試。');
+                });
+                return;
             }
-            const currentDateTime = new Date().toLocaleString();
-            currentSpace.lastModified = currentDateTime;
-            localStorage.setItem(parkingDataKey, JSON.stringify(parkingData));
-            alert('資料已更新');
 
-            // 確認後回到 index.html
+            // 更新空白輸入狀況
+            currentSpace.lastModified = new Date().toLocaleString();
+            localStorage.setItem(parkingDataKey, JSON.stringify(parkingData));
+            updateUnqualifiedText(currentSpace.isUnqualified);
+            alert('資料已更新');
             window.location.href = 'index.html';
         }
 
@@ -112,11 +156,16 @@
         function clearInputs() {
             document.getElementById('text-input').value = '';
             document.getElementById('text-input').focus();
-            document.getElementById('confirm-btn').disabled = true;
+            document.getElementById('confirm-btn').disabled = false;
         }
 
         function goBack() {
-            window.location.href = 'index.html';
+            window.location.href = `index.html?period=${period}`;
+        }
+
+        function updateUnqualifiedText(isUnqualified) {
+            const unqualifiedTextElement = document.getElementById('unqualified-text');
+            unqualifiedTextElement.textContent = isUnqualified ? ' 違規' : '';
         }
     </script>
 </body>
