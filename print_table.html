@@ -46,6 +46,10 @@
         .back-grey-btn:hover {
             background-color: #A0A0A0;
         }
+        .back-btn-large {
+            padding: 15px 30px;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
@@ -69,15 +73,46 @@
         </thead>
         <tbody id="table-body"></tbody>
     </table>
-    <button onclick="window.location.href='index.html'">返回</button>
+    <button class="back-btn-large" onclick="window.location.href='index.html'">返回</button>
 
     <script>
-        const parkingDataKey = 'parkingDataBike'; // 確保與機車資料分開存儲
+        const parkingDataKey = 'parkingDataBike'; // 與 index.html 中的 key 一致
         let parkingData = JSON.parse(localStorage.getItem(parkingDataKey)) || {
-            first: Array(454).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', lastModified: '' })),
-            second: Array(454).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', lastModified: '' })),
-            third: Array(454).fill().map((_, i) => ({ id: i + 1, status: 'available', description: '', lastModified: '' }))
+            first: Array(454).fill().map((_, i) => ({
+                id: i + 1,
+                status: 'available',
+                description: '',
+                lastModified: '',
+                isUnqualified: false
+            })),
+            second: Array(454).fill().map((_, i) => ({
+                id: i + 1,
+                status: 'available',
+                description: '',
+                lastModified: '',
+                isUnqualified: false
+            })),
+            third: Array(454).fill().map((_, i) => ({
+                id: i + 1,
+                status: 'available',
+                description: '',
+                lastModified: '',
+                isUnqualified: false
+            }))
         };
+
+        // 根據停車格的狀態決定顯示的內容
+        function getStatusDisplay(space) {
+            if (space.isUnqualified) {
+                return '違規車輛'; // 紅色
+            } else if (space.status === 'not-available') {
+                return '合格車輛'; // 灰色
+            } else if (space.status === 'available') {
+                return '尚未停車'; // 綠色
+            } else {
+                return '未知';
+            }
+        }
 
         function filterTable(period) {
             const tableBody = document.getElementById('table-body');
@@ -86,7 +121,10 @@
             if (parkingData[period] && parkingData[period].length > 0) {
                 parkingData[period].forEach(space => {
                     const row = document.createElement('tr');
-                    row.innerHTML = `<td>${space.id}</td><td>${space.description || '無描述'}</td><td>${space.status === 'available' ? '可用' : '不可用'}</td><td>${space.lastModified || '無記錄'}</td>`;
+                    row.innerHTML = `<td>${space.id}</td>
+                                     <td>${space.description || '無描述'}</td>
+                                     <td>${getStatusDisplay(space)}</td>
+                                     <td>${space.lastModified || '無記錄'}</td>`;
                     tableBody.appendChild(row);
                 });
             } else {
