@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>停車場管理系統</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        h1, h2 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px auto;
+        }
+
+        .zone-button {
+            padding: 10px 20px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .zone-button.red { background-color: #e74c3c; }
+        .zone-button.blue { background-color: #3498db; }
+        .zone-button.green { background-color: #2ecc71; }
+        .zone-button.purple { background-color: #9b59b6; }
+        .zone-button.pink { background-color: #ff69b4; }
+        .zone-button.yellow { background-color: #f1c40f; }
+
+        .result-container {
+            max-width: 80%;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #34495e;
+            color: white;
+        }
+
+        .back-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #555;
+            color: white;
+            text-align: center;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+    </style>
+    <script>
+        async function viewStatistics(zoneColor) {
+            const resultContainer = document.getElementById("result-container");
+            resultContainer.innerHTML = ""; // 清空之前的結果
+
+            try {
+                const response = await fetch(`zone_statistics.php?zoneColor=${encodeURIComponent(zoneColor)}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const data = result.data;
+                    const tableHTML = `
+                        <h2>${data.zoneColor} 使用率統計</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>區域顏色</th>
+                                    <th>已用停車格數</th>
+                                    <th>區域最大停車格數</th>
+                                    <th>區域使用率 (%)</th>
+                                    <th>總停車格數</th>
+                                    <th>總使用率 (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>${data.zoneColor}</td>
+                                    <td>${data.latestUsedSpaces}</td>
+                                    <td>${data.maxSpaces}</td>
+                                    <td>${data.zoneUsageRate}%</td>
+                                    <td>${data.totalSpaces}</td>
+                                    <td>${data.totalUsageRate}%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h2>${data.zoneColor} 使用記錄</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>數量</th>
+                                    <th>送出時間</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.records.map(record => `
+                                    <tr>
+                                        <td>${record['數量']}</td>
+                                        <td>${record['送出時間']}</td>
+                                    </tr>`).join('')}
+                            </tbody>
+                        </table>
+                        <a href="德意志納粹主義.html" class="back-button">返回主頁</a>
+                    `;
+                    resultContainer.innerHTML = tableHTML;
+                } else {
+                    resultContainer.innerHTML = `<p class="error">${result.message || "找不到該區域的數據！"}</p>`;
+                }
+            } catch (error) {
+                resultContainer.innerHTML = `<p class="error">無法檢索數據，請稍後再試！</p>`;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>停車場管理系統</h1>
+
+    <div class="button-container">
+        <button class="zone-button red" onclick="viewStatistics('紅色區域')">紅色區域統計</button>
+        <button class="zone-button blue" onclick="viewStatistics('藍色區域')">藍色區域統計</button>
+        <button class="zone-button green" onclick="viewStatistics('綠色區域')">綠色區域統計</button>
+        <button class="zone-button purple" onclick="viewStatistics('紫色區域')">紫色區域統計</button>
+        <button class="zone-button pink" onclick="viewStatistics('粉紅區域')">粉紅區域統計</button>
+        <button class="zone-button yellow" onclick="viewStatistics('黃色區域')">黃色區域統計</button>
+    </div>
+
+    <div id="result-container" class="result-container"></div>
+</body>
+</html>
