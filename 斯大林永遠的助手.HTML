@@ -40,6 +40,7 @@
         .zone-button.purple { background-color: #9b59b6; }
         .zone-button.pink { background-color: #ff69b4; }
         .zone-button.yellow { background-color: #f1c40f; }
+        .zone-button.orange { background-color: #f39c12; }
 
         .result-container {
             max-width: 80%;
@@ -71,18 +72,77 @@
             color: white;
         }
 
-        .back-button {
-            display: block;
+        .chart-container {
             margin: 20px auto;
-            padding: 10px 20px;
-            background-color: #555;
+            max-width: 100%;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .toggle-container {
+            cursor: pointer;
+            background-color: #34495e;
             color: white;
+            padding: 10px;
             text-align: center;
             border-radius: 5px;
-            text-decoration: none;
+            margin-top: 20px;
+        }
+
+        .toggle-content {
+            display: none;
+            margin-top: 10px;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        async function viewNotes() {
+            const resultContainer = document.getElementById("result-container");
+            resultContainer.innerHTML = ""; // 清空之前的結果
+
+            try {
+                const response = await fetch("view_notes.php");
+                const result = await response.json();
+
+                if (result.success) {
+                    const notes = result.data.filter(note => note['備註']); // 僅保留有備註的資料
+                    if (notes.length === 0) {
+                        resultContainer.innerHTML = `<p>目前沒有備註的資料！</p>`;
+                        return;
+                    }
+
+                    const tableHTML = `
+                        <h2>備註查詢</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>區域顏色</th>
+                                    <th>備註內容</th>
+                                    <th>送出時間</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${notes.map(note => `
+                                    <tr>
+                                        <td>${note['區域顏色']}</td>
+                                        <td>${note['備註']}</td>
+                                        <td>${note['送出時間']}</td>
+                                    </tr>`).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                    resultContainer.innerHTML = tableHTML;
+                } else {
+                    resultContainer.innerHTML = `<p>${result.message || "查詢失敗！"}</p>`;
+                }
+            } catch (error) {
+                resultContainer.innerHTML = `<p>無法檢索備註數據，請稍後再試！</p>`;
+            }
+        }
+
         async function viewStatistics(zoneColor) {
             const resultContainer = document.getElementById("result-container");
             resultContainer.innerHTML = ""; // 清空之前的結果
@@ -94,7 +154,7 @@
                 if (result.success) {
                     const data = result.data;
                     const tableHTML = `
-                        <h2>${data.zoneColor} 使用率統計</h2>
+                        <h2>${data.zoneColor} 使用率統計 (最新資料)</h2>
                         <table>
                             <thead>
                                 <tr>
@@ -117,31 +177,63 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <h2>${data.zoneColor} 使用記錄</h2>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>數量</th>
-                                    <th>送出時間</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${data.records.map(record => `
+                        <div class="toggle-container" onclick="toggleHistory()">
+                            歷史紀錄
+                        </div>
+                        <div id="history-content" class="toggle-content">
+                            <table>
+                                <thead>
                                     <tr>
-                                        <td>${record['數量']}</td>
-                                        <td>${record['送出時間']}</td>
-                                    </tr>`).join('')}
-                            </tbody>
-                        </table>
-                        <a href="德意志納粹主義.html" class="back-button">返回主頁</a>
+                                        <th>數量</th>
+                                        <th>送出時間</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.records.map(record => `
+                                        <tr>
+                                            <td>${record['數量']}</td>
+                                            <td>${record['送出時間']}</td>
+                                        </tr>`).join('')}
+                                </tbody>
+                            </table>
+                            <div class="chart-container">
+                                <canvas id="chart-${zoneColor}"></canvas>
+                            </div>
+                        </div>
                     `;
                     resultContainer.innerHTML = tableHTML;
+
+                    const ctx = document.getElementById(`chart-${zoneColor}`).getContext("2d");
+                    new Chart(ctx, {
+                        type: "bar",
+                        data: {
+                            labels: data.records.map(record => record["送出時間"]),
+                            datasets: [{
+                                label: "已用停車格數",
+                                data: data.records.map(record => record["數量"]),
+                                backgroundColor: "rgba(75, 192, 192, 0.2)",
+                                borderColor: "rgba(75, 192, 192, 1)",
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
                 } else {
-                    resultContainer.innerHTML = `<p class="error">${result.message || "找不到該區域的數據！"}</p>`;
+                    resultContainer.innerHTML = `<p>${result.message || "找不到該區域的數據！"}</p>`;
                 }
             } catch (error) {
-                resultContainer.innerHTML = `<p class="error">無法檢索數據，請稍後再試！</p>`;
+                resultContainer.innerHTML = `<p>無法檢索數據，請稍後再試！</p>`;
             }
+        }
+
+        function toggleHistory() {
+            const content = document.getElementById("history-content");
+            content.style.display = content.style.display === "none" ? "block" : "none";
         }
     </script>
 </head>
@@ -155,6 +247,8 @@
         <button class="zone-button purple" onclick="viewStatistics('紫色區域')">紫色區域統計</button>
         <button class="zone-button pink" onclick="viewStatistics('粉紅區域')">粉紅區域統計</button>
         <button class="zone-button yellow" onclick="viewStatistics('黃色區域')">黃色區域統計</button>
+        <button class="zone-button black" onclick="viewNotes()">備註查詢</button>
+        <a href="德意志納粹主義.html" class="zone-button orange">返回主頁</a>
     </div>
 
     <div id="result-container" class="result-container"></div>

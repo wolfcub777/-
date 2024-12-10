@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>停車場管理系統</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* 停車場圖片及按鈕樣式 */
+        .parking-lot-container {
+            position: relative;
+            max-width: 100%;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .parking-lot-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px auto;
+        }
+
+        .zone-button {
+            padding: 10px 20px;
+            font-size: 14px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            color: white;
+            transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 顏色按鈕 */
+        .zone-button.red { background-color: #e74c3c; }
+        .zone-button.blue { background-color: #3498db; }
+        .zone-button.green { background-color: #2ecc71; }
+        .zone-button.purple { background-color: #9b59b6; }
+        .zone-button.pink { background-color: #ff69b4; }
+        .zone-button.yellow { background-color: #f1c40f; }
+        .zone-button.black { background-color: #333; }
+
+        /* 按鈕效果 */
+        .zone-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .zone-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, transparent 80%);
+            transform: scale(0);
+            transition: transform 0.5s ease;
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+
+        .zone-button:hover::before {
+            transform: scale(1);
+        }
+
+        /* 彈出視窗樣式 */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            z-index: 1000;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .popup h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .popup .info {
+            font-size: 14px;
+            color: #444;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .popup input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .popup button {
+            width: 45%;
+            padding: 10px;
+            margin: 5px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .popup button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .popup button[type="button"] {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .popup button:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+
+        /* 背景遮罩 */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        /* 彈出窗口淡入效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+    </style>
+    <script>
+        // 開啟彈出窗口並設置範圍限制和提示
+        function openPopup(zoneColor, min, max) {
+            document.getElementById("zoneColor").value = zoneColor;
+            const quantityInput = document.getElementById("quantity");
+            quantityInput.min = min;
+            quantityInput.max = max;
+            quantityInput.setAttribute("title", `數值必須在 ${min} 到 ${max} 之間`);
+            quantityInput.value = ''; // 清空之前的輸入
+
+            const infoText = `此區共有 ${max} 格停車位`;
+            document.getElementById("info").innerText = infoText;
+
+            document.getElementById("popup").style.display = "block";
+            document.getElementById("overlay").style.display = "block";
+        }
+
+        // 關閉彈出窗口
+        function closePopup() {
+            document.getElementById("popup").style.display = "none";
+            document.getElementById("overlay").style.display = "none";
+        }
+
+        // 提交數據到後端
+       async function submitData(event) {
+    event.preventDefault();
+    const formData = new FormData(document.getElementById("popup-form"));
+
+    // 檢查數量範圍
+    const quantity = parseInt(document.getElementById("quantity").value);
+    const min = parseInt(document.getElementById("quantity").min);
+    const max = parseInt(document.getElementById("quantity").max);
+
+    if (quantity < min || quantity > max) {
+        alert(`數值必須在 ${min} 到 ${max} 之間！`);
+        return;
+    }
+
+    // 發送 POST 請求到後端
+    const response = await fetch("submit_data.php", {
+        method: "POST",
+        body: formData
+    });
+
+    const result = await response.json();
+    if (result.success) {
+        alert("數據提交成功！");
+        closePopup(); // 關閉彈窗時清空備註
+    } else {
+        alert("數據提交失敗：" + result.error);
+    }
+}
+
+// 關閉彈出窗口並清空表單內容
+function closePopup() {
+    document.getElementById("popup").style.display = "none";
+    document.getElementById("overlay").style.display = "none";
+
+    // 清空表單數據
+    document.getElementById("popup-form").reset();
+}
+    </script>
+</head>
+<body>
+    <h1>停車場管理系統</h1>
+
+    <!-- 按鈕容器 -->
+    <div class="button-container">
+        <button class="zone-button red" onclick="openPopup('紅色區域', 0, 71)">紅色區域</button>
+        <button class="zone-button blue" onclick="openPopup('藍色區域', 0, 63)">藍色區域</button>
+        <button class="zone-button green" onclick="openPopup('綠色區域', 0, 60)">綠色區域</button>
+        <button class="zone-button purple" onclick="openPopup('紫色區域', 0, 130)">紫色區域</button>
+        <button class="zone-button pink" onclick="openPopup('粉紅區域', 0, 60)">粉紅區域</button>
+        <button class="zone-button yellow" onclick="openPopup('黃色區域', 0, 70)">黃色區域</button>
+        <button class="zone-button black" onclick="window.location.href='斯大林永遠的助手.HTML'">統計資料</button>
+    </div>
+
+    <!-- 停車場佈局 -->
+    <div class="parking-lot-container">
+        <img src="簡易.png" alt="停車場佈局" class="parking-lot-image">	
+    </div>
+
+    <!-- 背景遮罩 -->
+    <div id="overlay" class="overlay" onclick="closePopup()"></div>
+
+    <!-- 彈出視窗 -->
+  <div id="popup" class="popup">
+    <h3>輸入停車數量</h3>
+    <div id="info" class="info"></div>
+    <form id="popup-form" onsubmit="submitData(event)">
+        <input type="hidden" id="zoneColor" name="區域顏色">
+        <label for="quantity">數量：</label>
+        <input type="number" id="quantity" name="數量" required>
+        <br>
+        <label for="remark">備註：</label>
+        <input type="text" id="remark" name="備註" placeholder="輸入備註" maxlength="100">
+        <br>
+        <button type="submit">確認</button>
+        <button type="button" onclick="closePopup()">取消</button>
+    </form>
+</div>
+</body>
+</html>
