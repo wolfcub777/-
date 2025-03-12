@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>巡查人員登入</title>
+    <style>
+        /* 全局樣式 */
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 登入表單容器 */
+        .login-container {
+            width: 350px;
+            margin: 100px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        /* 標題 */
+        h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        /* 輸入框樣式 */
+        input[type="text"],
+        input[type="password"] {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        /* 登入按鈕 */
+        button {
+            width: 95%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* 返回按鈕 */
+        .back-link {
+            display: inline-block;
+            margin-top: 15px;
+            font-size: 16px;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>巡查人員登入</h2>
+        <form action="處理巡查人員登入.php" method="post">
+            <input type="text" name="account" placeholder="職員編號" required>
+            <input type="password" name="password" placeholder="身分證" required>
+            <button type="submit">登入</button>
+        </form>
+        <a href="登入.html" class="back-link">返回登入頁面</a>
+    </div>
+</body>
+</html>
