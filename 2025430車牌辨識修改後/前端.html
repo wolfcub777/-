@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>OCR 圖片辨識</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: sans-serif;
+            background-color: #1e3c72;
+            color: white;
+            margin: 30px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #354b72;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background-color: #1f2b47;
+        }
+        #loading {
+            color: yellow;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h2>🔍 OCR 圖片辨識</h2>
+
+    <!-- 固定圖片辨識 -->
+    <button onclick="recognize()">使用固定圖片辨識</button>
+
+    <!-- 上傳圖片辨識 -->
+    <br><br>
+    <input type="file" id="imageInput" accept="image/*">
+    <br>
+    <button onclick="uploadAndRecognize()">上傳並辨識</button>
+
+    <!-- 儲存結果 -->
+    <br><br>
+    <button onclick="saveText()">儲存結果為文字檔</button>
+
+    <p id="loading" style="display: none;">🔄 辨識中...</p>
+    <p id="result">辨識結果：尚未執行</p>
+
+    <script>
+    function recognize() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('result').innerText = '辨識中（固定圖片）...';
+
+        fetch('http://127.0.0.1:5000/predict')
+            .then(response => {
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                if (data.error) {
+                    document.getElementById('result').innerText = "❌ 錯誤：" + data.error;
+                } else {
+                    document.getElementById('result').innerText = "✅ 辨識結果：" + data.text;
+                }
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('result').innerText = "⚠️ 無法連接後端：" + error;
+            });
+    }
+
+    function uploadAndRecognize() {
+        const input = document.getElementById('imageInput');
+        if (input.files.length === 0) {
+            alert("請先選擇圖片！");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', input.files[0]);
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('result').innerText = '辨識中（上傳圖片）...';
+
+        fetch('http://127.0.0.1:5000/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('loading').style.display = 'none';
+            if (data.error) {
+                document.getElementById('result').innerText = "❌ 錯誤：" + data.error;
+            } else {
+                document.getElementById('result').innerText = "✅ 辨識結果：" + data.text;
+            }
+        })
+        .catch(error => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('result').innerText = "⚠️ 無法連接後端：" + error;
+        });
+    }
+
+    function saveText() {
+        fetch('http://127.0.0.1:5000/save', { method: 'POST' })
+            .then(response => {
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                return response.json();
+            })
+            .then(data => {
+                alert(data.message || "已儲存文字檔！");
+            })
+            .catch(error => {
+                alert("⚠️ 儲存失敗：" + error);
+            });
+    }
+    </script>
+</body>
+</html>
