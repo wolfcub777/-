@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>選擇巡查區域</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        .container { margin-top: 50px; }
+        .zone-button {
+            display: block;
+            width: 200px;
+            padding: 15px;
+            margin: 10px auto;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .zone-button:hover { background: #2980b9; }
+    </style>
+    <script>
+      async function loadParkingAreas() {
+    try {
+        const response = await fetch("fetch_parking_area.php");
+        const data = await response.json();
+        const container = document.getElementById("parkingAreas");
+
+        console.log("API 回應：", data); // 🔍 確保 API 回應被記錄
+
+        if (data.success && data.areas.length > 0) {
+            container.innerHTML = ""; // 清空原內容
+            data.areas.forEach(area => {
+                const button = document.createElement("button");
+                button.className = "zone-button";
+                button.innerText = area.name;
+                button.onclick = () => location.href = `德意志納粹主義.html?parking_id=${area.id}`;
+                container.appendChild(button);
+            });
+        } else {
+            container.innerHTML = "<p>目前沒有可用的巡查區域</p>";
+        }
+    } catch (error) {
+        console.error("載入巡查區域時發生錯誤", error);
+        document.getElementById("parkingAreas").innerHTML = "<p>載入錯誤，請稍後重試</p>";
+    }
+}
+
+// **加載巡查區域**
+loadParkingAreas();
+    </script>
+</head>
+<body>
+    <h1>請選擇巡查區域</h1>
+    <div class="container" id="parkingAreas">
+        <p>載入中...</p>
+    </div>
+</body>
+</html>

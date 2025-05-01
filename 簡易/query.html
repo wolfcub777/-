@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查詢歷史數據</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 50%;
+            margin: auto;
+        }
+        .button-export {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>查詢歷史數據</h1>
+
+    <input type="date" id="dateInput">
+    <button onclick="fetchHistory()">查詢</button>
+    <button class="button-export" onclick="window.location.href='export_report.php'">匯出報表 📥</button>
+
+    <div class="container">
+        <h3>查詢結果</h3>
+        <p><strong>總筆數：</strong> <span id="totalEntries">-</span></p>
+        <p><strong>平均使用率：</strong> <span id="averageUsageRate">-</span>%</p>
+        <canvas id="historyChart"></canvas>
+    </div>
+
+    <script>
+        async function fetchHistory() {
+            let date = document.getElementById("dateInput").value;
+
+            if (!date) {
+                alert("請選擇日期！");
+                return;
+            }
+
+            try {
+                const response = await fetch(`fetch_parking_data.php?type=day&value=${date}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById("totalEntries").innerText = data.total_entries;
+                    document.getElementById("averageUsageRate").innerText = data.average_usage_rate;
+
+                    renderChart(data.records);
+                } else {
+                    alert("無數據：" + data.message);
+                }
+            } catch (error) {
+                alert("發生錯誤：" + error.message);
+            }
+        }
+
+        function renderChart(records) {
+            let ctx = document.getElementById("historyChart").getContext("2d");
+
+            if (window.myChart) {
+                window.myChart.destroy();
+            }
+
+            let labels = records.map(record => record.送出時間);
+            let usedData = records.map(record => record.已停車);
+            let unusedData = records.map(record => record.剩餘車位);
+
+            window.myChart = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: "已停車", data: usedData, backgroundColor: "red" },
+                        { label: "未停車", data: unusedData, backgroundColor: "black" }
+                    ]
+                },
+                options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+        }
+    </script>
+</body>
+</html>

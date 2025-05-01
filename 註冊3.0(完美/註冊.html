@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>註冊</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function updateForm() {
+            var identity = document.getElementById("identity").value;
+            var studentTeacherFields = document.getElementById("student_teacher_fields");
+            var staffFields = document.getElementById("staff_fields");
+            var schoolTimeSelect = document.getElementById("school_time");
+
+            // 控制對應欄位顯示
+            studentTeacherFields.style.display = (identity === "學生" || identity === "教師") ? "block" : "none";
+            staffFields.style.display = (identity === "職員") ? "block" : "none";
+
+            // 學生才顯示學間（日間/夜間），教師 & 職員應該隱藏
+            if (identity === "學生") {
+                schoolTimeSelect.style.display = "block";
+                schoolTimeSelect.setAttribute("required", "true");
+            } else {
+                schoolTimeSelect.style.display = "none";
+                schoolTimeSelect.removeAttribute("required");
+            }
+        }
+
+        function validateForm() {
+            var identity = document.getElementById("identity").value;
+            if (!identity) {
+                alert("❌ 請選擇身分");
+                return false;
+            }
+
+            var idCard = document.getElementById("id_card").value;
+            var licensePlate = document.getElementById("license_plate").value;
+            var idCardRegex = /^[A-Z]{1}[0-9]{9}$/;
+            var licensePlateRegex = /^[A-Z]{3}-[0-9]{4}$/;
+
+            if (!idCardRegex.test(idCard)) {
+                alert("❌ 身分證格式錯誤 (A123456789)");
+                return false;
+            }
+
+            if (!licensePlateRegex.test(licensePlate)) {
+                alert("❌ 車牌號碼格式錯誤 (ABC-1234)");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+    <style>
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        button {
+            width: 48%;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .register-button {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .register-button:hover {
+            background-color: #0056b3;
+        }
+
+        .back-button {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+
+        /* 修正欄位排版 */
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body onload="updateForm()">
+
+    <div class="container">
+        <h2>註冊</h2>
+        <form action="處理註冊.php" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+            
+            <!-- 身分 -->
+            <select name="identity" id="identity" onchange="updateForm()" required>
+                <option value="" selected disabled>請選擇身分</option>
+                <option value="學生">學生</option>
+                <option value="教師">教師</option>
+                <option value="職員">職員</option>
+            </select>
+
+            <!-- 學生 & 教師 適用 -->
+            <div id="student_teacher_fields" style="display:none;">
+                <select name="education_type" required>
+                    <option value="五專">五專</option>
+                    <option value="二專進修部">二專進修部</option>
+                    <option value="二專在職班">二專在職班</option>
+                    <option value="大學部">大學部</option>
+                </select>
+
+                <select name="major" required>
+                    <option value="護理科">護理科</option>
+                    <option value="嬰幼兒保育科">嬰幼兒保育科</option>
+                    <option value="視光學科">視光學科</option>
+                    <option value="資訊管理科">資訊管理科</option>
+                    <option value="數位影視動畫科">數位影視動畫科</option>
+                    <option value="應用外語科">應用外語科</option>
+                    <option value="企業管理科">企業管理科</option>
+                </select>
+
+                <select name="school_time" id="school_time" required>
+                    <option value="日間">日間</option>
+                    <option value="夜間">夜間</option>
+                </select>
+            </div>
+
+            <!-- 職員 適用 -->
+            <div id="staff_fields" style="display:none;">
+                <select name="division" required>
+                    <option value="教務處">教務處</option>
+                    <option value="總務處">總務處</option>
+                    <option value="人事室">人事室</option>
+                    <option value="會計室">會計室</option>
+                    <option value="學生事務處">學生事務處</option>
+                </select>
+            </div>
+
+            <!-- 其他資訊（這部分不受身分影響，保持顯示） -->
+            <input type="text" name="name" placeholder="姓名" required>
+            <input type="text" name="user_id" placeholder="學號 / 職員編號" required>
+            <input type="tel" name="phone" placeholder="電話" required>
+            <input type="email" name="email" placeholder="信箱" required>
+            <input type="text" name="id_card" id="id_card" placeholder="A123456789" required>
+            <input type="text" name="license_plate" id="license_plate" placeholder="ABC-1234" required>
+            <input type="file" name="image" required>
+
+            <div class="button-container">
+                <button type="button" class="back-button" onclick="window.location.href='登入.html'">返回登入</button>
+                <button type="submit" class="register-button">註冊</button>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

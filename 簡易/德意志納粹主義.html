@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>停車場管理系統</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+
+        h1 { margin-bottom: 20px; }
+
+        .parking-lot-container {
+            position: relative;
+            max-width: 100%;
+            margin: auto;
+        }
+
+        .parking-lot-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px auto;
+        }
+
+        .zone-button {
+            color: white;
+            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .black { background-color: #424242; }
+        .red { background-color: #E53935; }
+        .blue { background-color: #1E88E5; }
+        .zone-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            width: 50%;
+            margin: auto;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 100px;
+            padding: 10px;
+            font-size: 16px;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .edit-btn {
+            background-color: #f1c40f;
+            color: black;
+            margin-left: 5px;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            margin-left: 5px;
+        }
+
+        .submit-btn {
+            background-color: #2ecc71;
+            color: white;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        .stat-container {
+            margin-top: 20px;
+            font-size: 18px;
+            padding: 10px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: inline-block;
+            width: 60%;
+        }
+    </style>
+</head>
+<body>
+    <h1>停車場管理系統</h1>
+
+    <div class="parking-lot-container">
+        <img src="B252.svg" alt="停車場佈局" class="parking-lot-image">  
+    </div>
+
+    <div class="button-container">
+        <button class="zone-button blue" onclick="showInputSection()">輸入停車數據</button>
+        <button class="zone-button black" onclick="window.location.href='斯大林永遠的助手.HTML'">統計資料</button>
+        <button class="zone-button red" onclick="window.location.href='巡查類別.html'">返回</button>
+    </div>
+
+    <div class="input-container" id="inputContainer">
+        <h3>請輸入停車數據</h3>
+        <div class="input-group">
+            <input type="number" id="parkingInput" placeholder="輸入車數" min="0">
+            <button onclick="confirmInput()">確認</button>
+        </div>
+        <button class="submit-btn" onclick="submitAllData()">完成統計</button>
+    </div>
+
+    <div class="stat-container">
+        <p><strong>總車位：</strong> 454</p>
+        <p><strong>已停車：</strong> <span id="usedSpots">0</span></p>
+        <p><strong>剩餘車位：</strong> <span id="remainingSpots">454</span></p>
+        <p><strong>使用率：</strong> <span id="usageRate">0%</span></p>
+    </div>
+
+    <script>
+        let totalSpots = 454;
+        let inputData = [];
+async function submitAllData() {
+    if (inputData.length === 0) {
+        alert("請至少輸入一筆數據！");
+        return;
+    }
+
+    let totalUsed = inputData.reduce((sum, num) => sum + num, 0);
+
+    if (totalUsed > totalSpots) {
+        alert("提交的總數超過總停車位，請檢查輸入！");
+        return;
+    }
+
+    try {
+        let response = await fetch("submit_data.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ usedSpots: totalUsed })
+        });
+
+        let result = await response.json();
+
+        if (result.success) {
+            alert("數據提交成功！");
+            location.reload(); // 重新整理頁面
+        } else {
+            alert("提交失敗：" + result.message);
+        }
+    } catch (error) {
+        alert("發生錯誤：" + error.message);
+    }
+}
+
+        function showInputSection() {
+            document.getElementById("inputContainer").style.display = "flex";
+        }
+
+        function confirmInput() {
+            let input = document.getElementById("parkingInput");
+            let value = parseInt(input.value);
+
+            if (isNaN(value) || value < 0) {
+                alert("請輸入有效數值！");
+                return;
+            }
+
+            let totalSum = inputData.reduce((sum, num) => sum + num, 0) + value;
+            if (totalSum > totalSpots) {
+                alert("輸入數據總和超過總停車位！請重新輸入。");
+                return;
+            }
+
+            inputData.push(value);
+            updateStats();
+
+            let inputGroup = document.createElement("div");
+            inputGroup.className = "input-group";
+
+            let newInput = document.createElement("input");
+            newInput.type = "number";
+            newInput.value = value;
+            newInput.disabled = true;
+
+            let editBtn = document.createElement("button");
+            editBtn.textContent = "修改";
+            editBtn.className = "edit-btn";
+            editBtn.onclick = function () {
+                editInput(newInput, value);
+            };
+
+            let deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "刪除";
+            deleteBtn.className = "delete-btn";
+            deleteBtn.onclick = function () {
+                deleteInput(inputGroup, value);
+            };
+
+            inputGroup.appendChild(newInput);
+            inputGroup.appendChild(editBtn);
+            inputGroup.appendChild(deleteBtn);
+            document.getElementById("inputContainer").appendChild(inputGroup);
+            input.value = "";
+        }
+
+        function updateStats() {
+            let totalUsed = inputData.reduce((sum, num) => sum + num, 0);
+            document.getElementById("usedSpots").innerText = totalUsed;
+            document.getElementById("remainingSpots").innerText = totalSpots - totalUsed;
+            document.getElementById("usageRate").innerText = ((totalUsed / totalSpots) * 100).toFixed(2) + "%";
+        }
+
+   function editInput(inputElement, oldValue) {
+    let index = inputData.indexOf(oldValue);
+    if (index === -1) {
+        alert("找不到對應數據，請重試！");
+        return;
+    }
+
+    let newValue = prompt("請輸入新的數量", oldValue);
+    if (newValue === null) return; // 如果使用者取消修改
+    newValue = parseInt(newValue);
+
+    if (isNaN(newValue) || newValue < 0) {
+        alert("請輸入有效的數值！");
+        return;
+    }
+
+    let totalSum = inputData.reduce((sum, num, i) => i === index ? sum : sum + num, 0) + newValue;
+    if (totalSum > totalSpots) {
+        alert("修改後的總數超過總車位，請重新輸入！");
+        return;
+    }
+
+    // 更新數據
+    inputData[index] = newValue;
+    inputElement.value = newValue;
+
+    // 重新綁定按鈕
+    let inputGroup = inputElement.parentElement;
+    let editBtn = inputGroup.querySelector(".edit-btn");
+    let deleteBtn = inputGroup.querySelector(".delete-btn");
+
+    editBtn.onclick = function () {
+        editInput(inputElement, newValue);  // 確保新的值進行修改
+    };
+
+    deleteBtn.onclick = function () {
+        deleteInput(inputGroup, newValue);  // 刪除時正確刪除新的值
+    };
+
+    updateStats();
+}
+function deleteInput(inputGroup, value) {
+    let index = inputData.indexOf(value);
+    if (index === -1) {
+        alert("找不到對應數據，請重試！");
+        return;
+    }
+
+    // 移除陣列中的數據
+    inputData.splice(index, 1);
+
+    // 刪除該行 UI
+    inputGroup.remove();
+
+    // 重新計算總停車數據
+    updateStats();
+}
+    </script>
+</body>
+</html>

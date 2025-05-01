@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>審核申請</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .approve {
+            background: green;
+            color: white;
+        }
+        .reject {
+            background: red;
+            color: white;
+            margin-left: 5px;
+        }
+        .batch-actions {
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        let selectedUsers = [];
+
+        function toggleSelection(userId) {
+            if (selectedUsers.includes(userId)) {
+                selectedUsers = selectedUsers.filter(id => id !== userId);
+            } else {
+                selectedUsers.push(userId);
+            }
+        }
+
+        function approveUsers() {
+            if (selectedUsers.length === 0) {
+                alert("請選擇至少一個用戶！");
+                return;
+            }
+            sendRequest("approve", selectedUsers, []);
+        }
+
+        function rejectUsers() {
+            if (selectedUsers.length === 0) {
+                alert("請選擇至少一個用戶！");
+                return;
+            }
+
+            let reasons = selectedUsers.map(userId => {
+                return prompt(`請輸入 ${userId} 的拒絕原因（可留空）：`) || "";
+            });
+
+            sendRequest("reject", selectedUsers, reasons);
+        }
+
+        function sendRequest(action, userIds, reasons) {
+            let formData = new FormData();
+            formData.append("action", action);
+            formData.append("user_ids", JSON.stringify(userIds));
+            formData.append("reasons", JSON.stringify(reasons));
+
+            fetch("處理審核.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                location.reload();
+            })
+            .catch(error => console.error("錯誤:", error));
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch("獲取申請資料.php")
+            .then(response => response.json())
+            .then(data => {
+                let table = document.getElementById("userTable");
+                table.innerHTML = "";
+
+                data.forEach(user => {
+                    let row = table.insertRow();
+                    row.innerHTML = `
+                        <td><input type="checkbox" onchange="toggleSelection('${user.學號}')"></td>
+                        <td>${user.學號}</td>
+                        <td>${user.身分}</td>
+                        <td>${user.學部}</td>
+                        <td>${user.科別 ? user.科別 : "無"}</td>
+                        <td>${user.學制 ? user.學制 : "無"}</td>
+                        <td>${user.姓名}</td>
+                        <td>${user.電話}</td>
+                        <td>${user.信箱}</td>
+                        <td>${user.身分證}</td>
+                        <td>${user.車牌號碼}</td>
+                        <td>${user.圖片 ? `<a href="${user.圖片}" target="_blank">查看</a>` : "無"}</td>
+                        <td>
+                            <button class="approve" onclick="sendRequest('approve', ['${user.學號}'], [''])">同意</button>
+                            <button class="reject" onclick="sendRequest('reject', ['${user.學號}'], [prompt('請輸入拒絕理由（可留空）：') || ''])">拒絕</button>
+                        </td>
+                    `;
+                });
+            })
+            .catch(error => console.error("載入資料失敗:", error));
+        });
+    </script>
+</head>
+<body>
+
+    <div class="container">
+        <h2>審核申請</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>選擇</th>
+                    <th>學號 / 職員編號</th>
+                    <th>身分</th>
+                    <th>學部</th>
+                    <th>科別 / 處室</th>
+                    <th>學制</th>
+                    <th>姓名</th>
+                    <th>電話</th>
+                    <th>信箱</th>
+                    <th>身分證</th>
+                    <th>車牌號碼</th>
+                    <th>圖片</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="userTable"></tbody>
+        </table>
+        
+        <div class="batch-actions">
+            <button class="approve" onclick="approveUsers()">批量同意</button>
+            <button class="reject" onclick="rejectUsers()">批量拒絕</button>
+        </div>
+    </div>
+
+</body>
+</html>

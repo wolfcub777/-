@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>停車場統計</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 20px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .blue { background-color: #3498db; color: white; }
+        .green { background-color: #2ecc71; color: white; }
+        .red { background-color: #e74c3c; color: white; }
+
+        .stats-container {
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: inline-block;
+            text-align: left;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #ddd;
+            cursor: pointer;
+        }
+
+        .chart-container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>停車場統計</h1>
+
+    <div class="button-container">
+        <button class="blue" onclick="fetchStats('day')">📊 今日統計</button>
+        <button class="green" onclick="window.location.href='query.html'">🔍 查詢歷史資料</button>
+        <button class="red" onclick="window.location.href='德意志納粹主義.html'">🔙 返回</button>
+    </div>
+
+    <div class="stats-container">
+        <h3>📊 今日統計數據</h3>
+        <p><strong>總車位：</strong> 454</p>
+        <p><strong>已停車：</strong> <span id="usedSpots">0</span></p>
+        <p><strong>剩餘車位：</strong> <span id="remainingSpots">454</span></p>
+        <p><strong>使用率：</strong> <span id="usageRate">0%</span></p>
+
+        <h3>📑 今日記錄</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>時間</th>
+                    <th>停車數</th>
+                </tr>
+            </thead>
+            <tbody id="recordsTable">
+                <tr><td colspan="2">尚無記錄</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="usageChart"></canvas>
+    </div>
+
+    <script>
+        let totalSpots = 454;
+        let records = [];
+        let chartInstance = null;
+
+        async function fetchStats(range) {
+            try {
+                const response = await fetch(`history_data.php?range=${range}`);
+                const data = await response.json();
+
+                console.log("API 回應:", data); // 記錄 API 回應，方便 Debug
+
+                if (data.success && Array.isArray(data.records) && data.records.length > 0) {
+                    records = data.records;
+                    updateRecordsTable(records);
+                    updateStats(records[records.length - 1]); 
+                    renderBarChart(records);
+                } else {
+                    // **當沒有數據時，顯示友善提示，不顯示錯誤彈窗**
+                    document.getElementById("usedSpots").innerText = "今日無數據";
+                    document.getElementById("remainingSpots").innerText = "-";
+                    document.getElementById("usageRate").innerText = "-";
+                    document.getElementById("recordsTable").innerHTML = "<tr><td colspan='2' style='color: gray;'>今日尚無停車記錄</td></tr>";
+
+                    showNotification("今日無停車數據，請稍後再試！");
+
+                    // **當沒有數據時，清空圖表**
+                    renderBarChart([]);
+                }
+            } catch (error) {
+                console.error("發生錯誤：", error);
+                showNotification("無法獲取數據：" + error.message, true);
+            }
+        }
+
+        function showNotification(message, isError = false) {
+            let notification = document.createElement("div");
+            notification.innerText = message;
+            notification.style.position = "fixed";
+            notification.style.top = "20px";
+            notification.style.right = "20px";
+            notification.style.padding = "10px 20px";
+            notification.style.borderRadius = "5px";
+            notification.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
+            notification.style.backgroundColor = isError ? "#e74c3c" : "#3498db";
+            notification.style.color = "white";
+            notification.style.fontSize = "16px";
+            notification.style.zIndex = "1000";
+
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function updateRecordsTable(records) {
+            let tableBody = document.getElementById("recordsTable");
+            tableBody.innerHTML = "";
+
+            records.forEach((record) => {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${record.送出時間}</td>
+                    <td>${record.已停車}</td>
+                `;
+
+                row.onclick = () => {
+                    updateStats(record);
+                    renderBarChart([record]);  
+                };
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        function updateStats(record) {
+            document.getElementById("usedSpots").innerText = record.已停車;
+            document.getElementById("remainingSpots").innerText = totalSpots - record.已停車;
+            document.getElementById("usageRate").innerText = ((record.已停車 / totalSpots) * 100).toFixed(2) + "%";
+        }
+
+        function renderBarChart(records) {
+            let ctx = document.getElementById("usageChart").getContext("2d");
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            let labels = records.map(record => record.送出時間 || "無數據");
+            let usedData = records.map(record => record.已停車 || 0);
+            let unusedData = usedData.map(value => totalSpots - value);
+
+            chartInstance = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: "已停車", data: usedData, backgroundColor: "red" },
+                        { label: "未停車", data: unusedData, backgroundColor: "black" }
+                    ]
+                },
+                options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+        }
+
+        fetchStats("day");
+    </script>
+</body>
+</html>

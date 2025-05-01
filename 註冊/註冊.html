@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>註冊</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function updateForm() {
+            var identity = document.getElementById("identity").value;
+
+            // 顯示或隱藏對應區塊
+            document.getElementById("student_fields").style.display = (identity === "學生") ? "block" : "none";
+            document.getElementById("teacher_fields").style.display = (identity === "教師") ? "block" : "none";
+            document.getElementById("staff_fields").style.display = (identity === "職員") ? "block" : "none";
+
+            // 設定 `required`，防止未選擇時提交
+            document.querySelector("select[name='education_type']").required = (identity === "學生" || identity === "教師");
+            document.querySelector("select[name='major']").required = (identity === "學生" || identity === "教師");
+            document.querySelector("select[name='school_time']").required = (identity === "學生");
+            document.querySelector("select[name='division']").required = (identity === "職員");
+        }
+
+        function validateForm() {
+            var identity = document.getElementById("identity").value;
+            var educationType = document.querySelector("select[name='education_type']").value;
+            var major = document.querySelector("select[name='major']").value;
+            var schoolTime = document.querySelector("select[name='school_time']").value;
+            var division = document.querySelector("select[name='division']").value;
+            var idCard = document.getElementById("id_card").value;
+            var licensePlate = document.getElementById("license_plate").value;
+
+            var idCardRegex = /^[A-Z]{1}[0-9]{9}$/;
+            var licensePlateRegex = /^[A-Z]{3}-[0-9]{4}$/;
+
+            if (!identity) {
+                alert("❌ 請選擇身份");
+                return false;
+            }
+
+            if (identity === "學生" || identity === "教師") {
+                if (!educationType) {
+                    alert("❌ 請選擇學制");
+                    return false;
+                }
+                if (!major) {
+                    alert("❌ 請選擇科別");
+                    return false;
+                }
+            }
+
+            if (identity === "學生" && !schoolTime) {
+                alert("❌ 請選擇學間");
+                return false;
+            }
+
+            if (identity === "職員" && !division) {
+                alert("❌ 請選擇處室");
+                return false;
+            }
+
+            if (!idCardRegex.test(idCard)) {
+                alert("❌ 身分證格式錯誤 (A123456789)");
+                return false;
+            }
+
+            if (!licensePlateRegex.test(licensePlate)) {
+                alert("❌ 車牌號碼格式錯誤 (ABC-1234)");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+</head>
+<body onload="updateForm()">  <!-- 確保初始時觸發 updateForm() -->
+
+    <div class="container">
+        <h2>註冊</h2>
+        <form action="處理註冊.php" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+            
+            <!-- 身分 -->
+            <select name="identity" id="identity" onchange="updateForm()" required>
+                <option value="" selected disabled>請選擇身份</option>
+                <option value="學生">學生</option>
+                <option value="教師">教師</option>
+                <option value="職員">職員</option>
+            </select>
+
+            <!-- 學生 適用 -->
+            <div id="student_fields" style="display:none;">
+                <select name="education_type">
+                    <option value="" selected disabled>請選擇學制</option>
+                    <option value="五專">五專</option>
+                    <option value="二專進修部">二專進修部</option>
+                    <option value="二專在職班">二專在職班</option>
+                    <option value="大學部">大學部</option>
+                </select>
+
+                <select name="major">
+                    <option value="" selected disabled>請選擇科別</option>
+                     <option value="護理科">護理科</option>
+                    <option value="嬰幼兒保育科">嬰幼兒保育科</option>
+                    <option value="視光學科">視光學科</option>
+                    <option value="資訊管理科">資訊管理科</option>
+                    <option value="數位影視動畫科">數位影視動畫科</option>
+                    <option value="應用外語科">應用外語科</option>
+                    <option value="企業管理科">企業管理科</option>
+                </select>
+
+                <select name="school_time">
+                    <option value="" selected disabled>請選擇學間</option>
+                    <option value="日間">日間</option>
+                    <option value="夜間">夜間</option>
+                </select>
+            </div>
+
+            <!-- 教師 適用 -->
+            <div id="teacher_fields" style="display:none;">
+                <select name="education_type">
+                    <option value="" selected disabled>請選擇學制</option>
+                    <option value="五專">五專</option>
+                    <option value="二專進修部">二專進修部</option>
+                </select>
+
+                <select name="major">
+                    <option value="" selected disabled>請選擇科別</option>
+                    <option value="護理科">護理科</option>
+                    <option value="嬰幼兒保育科">嬰幼兒保育科</option>
+                    <option value="視光學科">視光學科</option>
+                    <option value="資訊管理科">資訊管理科</option>
+                    <option value="數位影視動畫科">數位影視動畫科</option>
+                    <option value="應用外語科">應用外語科</option>
+                    <option value="企業管理科">企業管理科</option>
+                </select>
+            </div>
+
+            <!-- 職員 適用 -->
+            <div id="staff_fields" style="display:none;">
+                <select name="division">
+                    <option value="" selected disabled>請選擇處室</option>
+                    <option value="教務處">教務處</option>
+                    <option value="總務處">總務處</option>
+                    <option value="人事室">人事室</option>
+                    <option value="會計室">會計室</option>
+                    <option value="學生事務處">學生事務處</option>
+                </select>
+            </div>
+
+            <!-- 其他資訊 -->
+            <input type="text" name="name" placeholder="姓名" required>
+            <input type="text" name="user_id" placeholder="學號 / 職員編號" required>
+            <input type="tel" name="phone" placeholder="電話" required>
+            <input type="email" name="email" placeholder="信箱" required>
+            <input type="text" name="id_card" id="id_card" placeholder="A123456789" required>
+            <input type="text" name="license_plate" id="license_plate" placeholder="ABC-1234" required>
+            <input type="file" name="image" required>
+
+            <button type="submit">註冊</button>
+        </form>
+    </div>
+
+</body>
+</html>

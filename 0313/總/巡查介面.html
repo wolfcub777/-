@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>巡查介面</title>
+    <script>
+        async function loadParkingArea() {
+            const params = new URLSearchParams(window.location.search);
+            const areaId = params.get("id");
+
+            if (!areaId) {
+                alert("未選擇停車場區域");
+                window.location.href = "巡查選擇.html";
+                return;
+            }
+
+            try {
+                const response = await fetch(`fetch_parking_area.php?id=${areaId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById("areaName").innerText = data.name;
+                    document.getElementById("totalSpots").innerText = data.total_spots;
+                    document.getElementById("parkingImage").src = data.image || "default.jpg";
+                } else {
+                    alert("無法加載停車區域資料");
+                    window.location.href = "巡查選擇.html";
+                }
+            } catch (error) {
+                alert("發生錯誤：" + error.message);
+            }
+        }
+
+        window.onload = loadParkingArea;
+    </script>
+</head>
+<body>
+    <h1 id="areaName">載入中...</h1>
+    <p>總車位數：<span id="totalSpots">...</span></p>
+    <img id="parkingImage" src="" alt="停車場圖片" style="max-width: 100%; height: auto;">
+</body>
+</html>

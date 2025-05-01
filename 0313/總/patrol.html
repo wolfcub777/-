@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>停車場巡查</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .container { width: 80%; margin: auto; padding: 20px; }
+        .parking-image { width: 100%; max-width: 600px; border: 2px solid #ccc; }
+        .info-box { padding: 20px; background: #f9f9f9; border-radius: 10px; margin-top: 20px; }
+        input { padding: 10px; font-size: 18px; text-align: center; }
+        button { padding: 10px 20px; font-size: 18px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<h1 id="parking-title">巡查介面</h1>
+
+<div class="container">
+    <img id="parking-image" class="parking-image" src="" alt="停車場圖片">
+    <div class="info-box">
+        <p><strong>總車位：</strong> <span id="total-spots">0</span></p>
+        <p><strong>已停車：</strong> <span id="used-spots">0</span></p>
+        <p><strong>剩餘車位：</strong> <span id="remaining-spots">0</span></p>
+        <p><strong>使用率：</strong> <span id="usage-rate">0%</span></p>
+    </div>
+
+    <input type="number" id="parking-input" placeholder="輸入已停車數">
+    <button onclick="submitParkingData()">提交</button>
+</div>
+
+<script>
+    // 取得 URL 參數
+    const urlParams = new URLSearchParams(window.location.search);
+    const parkingId = urlParams.get('id');
+
+    async function loadParkingData() {
+        if (!parkingId) {
+            alert("未選擇停車場");
+            return;
+        }
+
+        try {
+            let response = await fetch(`fetch_parking_data.php?id=${parkingId}`);
+            let data = await response.json();
+
+            if (data.success) {
+                document.getElementById("parking-title").innerText = data.parking.名稱;
+                document.getElementById("parking-image").src = data.parking.圖片;
+                document.getElementById("total-spots").innerText = data.parking.總車位;
+                document.getElementById("used-spots").innerText = data.parking.已停車;
+                document.getElementById("remaining-spots").innerText = data.parking.剩餘車位;
+                document.getElementById("usage-rate").innerText = data.parking.使用率 + "%";
+            } else {
+                alert("載入失敗：" + data.message);
+            }
+        } catch (error) {
+            console.error("錯誤:", error);
+        }
+    }
+
+    async function submitParkingData() {
+        let used = document.getElementById("parking-input").value;
+        if (used < 0) {
+            alert("輸入數據錯誤");
+            return;
+        }
+
+        let response = await fetch("submit_data.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: parkingId, usedSpots: used })
+        });
+
+        let result = await response.json();
+        if (result.success) {
+            alert("提交成功！");
+            location.reload();
+        } else {
+            alert("提交失敗：" + result.message);
+        }
+    }
+
+    loadParkingData();
+</script>
+
+</body>
+</html>

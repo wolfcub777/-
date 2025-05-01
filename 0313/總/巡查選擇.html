@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>選擇巡查區域</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        .container { margin-top: 50px; }
+        .zone-button {
+            display: block;
+            width: 200px;
+            padding: 15px;
+            margin: 10px auto;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .zone-button:hover { background: #2980b9; }
+    </style>
+</head>
+<body>
+
+<h1>請選擇巡查區域</h1>
+
+<div class="container">
+    <button class="zone-button" onclick="location.href='patrol.html?id=1'">地下停車場</button>
+    <button class="zone-button" onclick="location.href='patrol.html?id=2'">山上停車場</button>
+</div>
+
+</body>
+</html>
